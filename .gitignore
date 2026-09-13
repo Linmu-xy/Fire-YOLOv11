@@ -1,0 +1,19 @@
+# 数据集（体积大，不入库；如需共享请单独提供）
+datasets/
+
+# # 实验结果（可重新生成）
+# experiments/
+# runs/
+
+# # 预训练权重
+# weights/
+
+# # Python
+# __pycache__/
+# *.py[cod]
+# *.cache
+
+# # 编辑器 / 系统
+# .vscode/
+# .idea/
+# .DS_Store
