@@ -2,6 +2,27 @@
 
 火焰 / 烟雾检测的论文实验仓库：在同一批数据集上对比不同检测算法。
 
+## 研究实验框架 v1
+
+新增 `firesmoke/` 提供类别统一、标注/近重复审查、YOLO11n 与 P2 消融、训练期困难背景损失、
+源域光照增强、双向跨数据集评估、验证集报警校准、多种子汇总和推理基准。
+这是待验证的研究实现，不代表已经取得论文指标或满足某个期刊的录用标准。
+
+- [操作手册](docs/QUICKSTART.md)：从数据准备到你手动启动训练的完整命令。
+- [技术设计](docs/METHOD.md)：模型、损失公式、初始化、公平对比及限制。
+- [实验协议](docs/EXPERIMENT_PROTOCOL.md)：数据泄漏控制、研究假设、评价口径及论文表格。
+- [验证记录](docs/VALIDATION.md)：本次仅做代码、合成数据与 CPU 检查，不启动训练。
+
+```bash
+conda activate yolo11
+# 在仓库目录运行；默认只预览配置，不会训练。
+python -m firesmoke train --dataset dfire --method baseline --seed 0
+python -m unittest discover -s tests -v
+```
+
+只有显式加 `--execute` 才会开始训练。新实验使用 `configs/protocol.yaml`，
+不直接沿用下方历史实验的 `optimizer=auto` 或原始类别编号。
+
 ## 目录结构
 
 ```
@@ -56,13 +77,15 @@ yolo val model=experiments/yolo11n/D-Fire/weights/best.pt \
   data=datasets/D-Fire/data.yaml split=test imgsz=640
 ```
 
-## 已完成的基线
+## 历史验证集结果（不是独立测试集结果）
 
 | 算法 | 数据集 | epochs | mAP50 | mAP50-95 | Precision | Recall |
 |---|---|---|---|---|---|---|
 | yolo11n | D-Fire | 100 | 0.797 | 0.477 | 0.769 | 0.752 |
 
-（D-Fire 论文中 YOLOv8n 的 mAP50 为 0.787，可作为参照。）
+以上为历史训练末轮验证指标，不代表重新评估后的 best.pt 测试结果。
+`D-Fire` 与 `D-Fire_seed0` 都是 seed=0，不能作为两个独立随机种子；seed1 结果尚缺。
+新协议更改了初始化、优化器及标注有效性处理，须重新训练同协议基线后做公平对比。
 
 ## 注意事项
 
