@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "firesmoke-research"
+version = "0.1.0"
+description = "Reproducible nano fire/smoke detection experiments"
+requires-python = ">=3.10"
+dependencies = ["ultralytics==8.4.42", "PyYAML>=6,<7", "Pillow>=10", "numpy>=1.26,<3"]
+
+[project.scripts]
+firesmoke = "firesmoke.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["firesmoke*"]

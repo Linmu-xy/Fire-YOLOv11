@@ -1,5 +1,7 @@
 # 数据集（体积大，不入库；如需共享请单独提供）
 datasets/
+dataset.zip
+FASDD_CV.zip
 
 # # 实验结果（可重新生成）
 # experiments/
@@ -17,3 +19,15 @@ datasets/
 # .vscode/
 # .idea/
 # .DS_Store
+lxy论文.txt
+
+# Reproducible research outputs (existing tracked history is retained).
+artifacts/
+outputs/
+.runtime/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+build/
+dist/
