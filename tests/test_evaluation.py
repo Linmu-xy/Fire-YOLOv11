@@ -12,11 +12,26 @@ offline_runtime()
 import torch
 from ultralytics.cfg import get_cfg
 
-from firesmoke.evaluation import evaluate
+from firesmoke.evaluation import evaluate, load_model
 from firesmoke.models import ResearchModel, architecture
 
 
 class EvaluationIntegration(unittest.TestCase):
+    def test_srdg_checkpoint_roundtrip(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            model = ResearchModel(architecture("p2_srdg"), nc=2, verbose=False).eval()
+            model.args = get_cfg()
+            model.names = dict(enumerate(NAMES))
+            weights = root / "srdg.pt"
+            torch.save({"model": model, "train_args": {"task": "detect", "imgsz": 64},
+                        "epoch": -1}, weights)
+            loaded = load_model(weights)
+            with torch.inference_mode():
+                output = loaded.model(torch.zeros(1, 3, 64, 64))
+            prediction = output[0] if isinstance(output, tuple) else output
+            self.assertTrue(torch.isfinite(prediction).all())
+
     def test_checkpoint_evaluation_artifacts(self):
         torch.set_num_threads(2)
         with tempfile.TemporaryDirectory() as temp:

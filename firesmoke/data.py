@@ -12,12 +12,13 @@ from .common import NAMES, digest, fresh_dir, path, read_json, stable_digest, wr
 
 SPLITS = ("train", "val", "test")
 EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
+SUPPORTED_PROTOCOLS = {"firesmoke-v1", "firesmoke-v2"}
 
 
 def load_protocol(file):
     cfg = yaml.safe_load(path(file).read_text(encoding="utf-8"))
-    if cfg.get("protocol") != "firesmoke-v1":
-        raise ValueError("Unknown protocol version")
+    if cfg.get("protocol") not in SUPPORTED_PROTOCOLS:
+        raise ValueError(f"Unknown protocol version; expected one of {sorted(SUPPORTED_PROTOCOLS)}")
     return cfg
 
 

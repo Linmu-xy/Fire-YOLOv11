@@ -188,11 +188,12 @@ class ProtocolTests(unittest.TestCase):
 
     def test_all_ablation_plans(self):
         from firesmoke.experiment import plan
-        cfg = load_protocol("configs/protocol.yaml")
-        for ds in cfg["datasets"]:
-            for method in cfg["methods"]:
-                for seed in cfg["seeds"]:
-                    self.assertFalse(plan(cfg, ds, method, seed)["training_started"])
+        for config in ("configs/protocol.yaml", "configs/protocol-v2.yaml"):
+            cfg = load_protocol(config)
+            for ds in cfg["datasets"]:
+                for method in cfg["methods"]:
+                    for seed in cfg["seeds"]:
+                        self.assertFalse(plan(cfg, ds, method, seed)["training_started"])
 
     def test_duplicate_seeds_are_rejected(self):
         with tempfile.TemporaryDirectory() as temp:

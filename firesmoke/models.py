@@ -5,6 +5,8 @@ import json
 
 import torch
 import torch.nn.functional as F
+from torch import nn
+import ultralytics.nn.tasks as ultralytics_tasks
 from ultralytics.models.yolo.detect import DetectionTrainer
 from ultralytics.nn.tasks import DetectionModel
 from ultralytics.utils import ROOT as ULTRA_ROOT
@@ -18,7 +20,48 @@ def architecture(name):
         return str(ULTRA_ROOT / "cfg/models/11/yolo11n.yaml")
     if name == "p2":
         return str(ROOT / "configs/models/yolo11n-p2.yaml")
+    if name == "p2_srdg":
+        return str(ROOT / "configs/models/yolo11n-p2-srdg.yaml")
     raise ValueError(name)
+
+
+class SemanticResidualDetailGate(nn.Module):
+    """Use coarse semantic context to modulate shallow detail without erasing it.
+
+    Input channels are ordered ``[semantic, detail]``.  A zero-initialized 1x1
+    projection makes the module an exact identity at initialization.  The
+    multiplicative factor is bounded to ``[1-gain, 1+gain]`` by tanh, so the P2
+    detail path cannot collapse to zero when gain < 1.
+    """
+    def __init__(self, semantic_channels: int, detail_channels: int, gain: float = 0.5):
+        super().__init__()
+        if semantic_channels < 1 or detail_channels < 1:
+            raise ValueError("semantic_channels and detail_channels must be positive")
+        if not 0 < gain < 1:
+            raise ValueError("gain must be in (0, 1)")
+        self.semantic_channels = semantic_channels
+        self.detail_channels = detail_channels
+        self.gain = float(gain)
+        # Do not consume the global initialization stream. With the same seed,
+        # all downstream P2/Detect parameters therefore match the parent P2 arm.
+        with torch.random.fork_rng(devices=[]):
+            self.projection = nn.Conv2d(semantic_channels, detail_channels, kernel_size=1, bias=True)
+        nn.init.zeros_(self.projection.weight)
+        nn.init.zeros_(self.projection.bias)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        expected = self.semantic_channels + self.detail_channels
+        if x.ndim != 4 or x.shape[1] != expected:
+            raise ValueError(f"expected BCHW input with {expected} channels, got {tuple(x.shape)}")
+        semantic, detail = x.split((self.semantic_channels, self.detail_channels), dim=1)
+        modulation = 1.0 + self.gain * torch.tanh(self.projection(semantic))
+        return torch.cat((semantic, detail * modulation), dim=1)
+
+
+# Ultralytics resolves YAML module names from ultralytics.nn.tasks globals.  Registering
+# the class in memory keeps site-packages unchanged and makes the version-pinned model
+# graph reproducible from this repository.
+ultralytics_tasks.SemanticResidualDetailGate = SemanticResidualDetailGate
 
 
 def shared_transfer(model, source):

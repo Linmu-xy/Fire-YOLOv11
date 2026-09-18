@@ -12,7 +12,8 @@ from ultralytics.data.dataset import YOLODataset
 from ultralytics.nn.tasks import DetectionModel
 from ultralytics.utils.loss import v8DetectionLoss
 
-from firesmoke.models import BackgroundLoss, ResearchModel, architecture, background_penalty, shared_transfer, style_augment
+from firesmoke.models import (BackgroundLoss, ResearchModel, SemanticResidualDetailGate,
+                              architecture, background_penalty, shared_transfer, style_augment)
 
 torch.set_num_threads(2)
 
@@ -37,9 +38,35 @@ class ModelTests(unittest.TestCase):
         self.assertEqual(a.shape, x.shape)
         self.assertTrue((a >= 0).all() and (a <= 1).all())
 
+    def test_srdg_is_identity_at_initialization_and_trainable(self):
+        gate = SemanticResidualDetailGate(4, 4, gain=0.5)
+        x = torch.randn(2, 8, 8, 8, requires_grad=True)
+        y = gate(x)
+        self.assertTrue(torch.equal(x, y))
+        y.square().mean().backward()
+        self.assertTrue(torch.isfinite(gate.projection.weight.grad).all())
+        self.assertGreater(gate.projection.weight.grad.abs().sum().item(), 0)
+        self.assertTrue(torch.isfinite(x.grad).all())
+
+    def test_srdg_preserves_parent_initialization_stream(self):
+        torch.manual_seed(17)
+        parent = ResearchModel(architecture("p2"), nc=2, verbose=False)
+        torch.manual_seed(17)
+        candidate = ResearchModel(architecture("p2_srdg"), nc=2, verbose=False)
+        candidate_state = candidate.state_dict()
+        for key, value in parent.state_dict().items():
+            fields = key.split(".")
+            layer = int(fields[1])
+            if layer >= 25:
+                fields[1] = str(layer + 1)
+            paired_key = ".".join(fields)
+            self.assertIn(paired_key, candidate_state)
+            self.assertTrue(torch.equal(value, candidate_state[paired_key]), paired_key)
+
     def test_baseline_and_p2_forward_loss_and_shared_initialization(self):
         source = DetectionModel(architecture("baseline"), nc=2, verbose=False)
-        for arch, strides in (("baseline", [8, 16, 32]), ("p2", [4, 8, 16, 32])):
+        for arch, strides in (("baseline", [8, 16, 32]), ("p2", [4, 8, 16, 32]),
+                              ("p2_srdg", [4, 8, 16, 32])):
             with self.subTest(arch=arch):
                 model = ResearchModel(architecture(arch), nc=2, verbose=False)
                 model.args = get_cfg()
