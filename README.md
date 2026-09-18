@@ -12,6 +12,7 @@
 - [技术设计](docs/METHOD.md)：模型、损失公式、初始化、公平对比及限制。
 - [实验协议](docs/EXPERIMENT_PROTOCOL.md)：数据泄漏控制、研究假设、评价口径及论文表格。
 - [验证记录](docs/VALIDATION.md)：本次仅做代码、合成数据与 CPU 检查，不启动训练。
+- [下一次训练设计](docs/NEXT_TRAINING.md)：现有结果诊断、成对 baseline seed0 及后续判读规则。
 
 ```bash
 conda activate yolo11
