@@ -93,6 +93,6 @@ yolo val model=experiments/yolo11n/D-Fire/weights/best.pt \
    - `D-Fire`：`0=smoke`, `1=fire`
    - `FASDD_CV`：`0=fire`, `1=smoke`
 2. **D-Fire 含 9838 张背景图**（空标签文件），是官方 "None" 类，属正常样本。
-3. **离线环境已本地化**：预训练权重放在 `weights/`，Arial 字体放在 `~/.config/Ultralytics/Arial.ttf`（来自 Liberation Sans），无需联网。
+3. **离线环境已本地化**：预训练权重放在 `weights/`，Arial 字体放在 `~/.config/Ultralytics/Arial.ttf`（来自 Liberation Sans），无需联网。该路径是 Ultralytics 的默认 `USER_CONFIG_DIR`，仓库不覆盖 `YOLO_CONFIG_DIR`；若把配置目录改到别处，训练会因找不到字体去联网下载而失败。
 4. `datasets/FASDD_CV/annotations/YOLO_CV/images` 是指向 `../../images` 的软链，供 `train.txt` 里的 `./images/...` 解析，**移动数据集时整个目录一起移动即可保持有效**。
 5. 训练命令用 `yolo train`，不要用旧的 `yolo detect train` —— 后者会自动插入一层 `detect/` 目录，导致输出路径变成 `runs/detect/...`。

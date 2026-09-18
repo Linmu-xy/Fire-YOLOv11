@@ -75,9 +75,13 @@ def offline_runtime():
     # Set before importing Ultralytics; avoid implicit model downloads/installations.
     os.environ.setdefault("YOLO_OFFLINE", "true")
     os.environ.setdefault("YOLO_AUTOINSTALL", "false")
-    os.environ.setdefault("YOLO_CONFIG_DIR", str(ROOT / ".runtime" / "ultralytics"))
+    # Deliberately keep Ultralytics' own config dir. check_font() only probes
+    # USER_CONFIG_DIR/Arial.ttf (== $YOLO_CONFIG_DIR/Ultralytics/Arial.ttf) and otherwise
+    # downloads it from ultralytics.com, which fails offline. The font is installed once at
+    # ~/.config/Ultralytics/Arial.ttf, so overriding this to a repo-local dir would force a
+    # download on every fresh clone. Matplotlib stays repo-local: only a cache, always writable.
+    os.environ.pop("YOLO_CONFIG_DIR", None)
     os.environ.setdefault("MPLCONFIGDIR", str(ROOT / ".runtime" / "matplotlib"))
-    Path(os.environ["YOLO_CONFIG_DIR"]).mkdir(parents=True, exist_ok=True)
     Path(os.environ["MPLCONFIGDIR"]).mkdir(parents=True, exist_ok=True)
     if importlib.metadata.version("ultralytics") != "8.4.42":
         raise RuntimeError("This research adapter requires ultralytics==8.4.42; review/test before upgrading.")

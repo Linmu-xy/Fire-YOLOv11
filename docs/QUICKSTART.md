@@ -20,6 +20,12 @@ python -m unittest discover -s tests -v
 `weights/yolo11n.pt` 必须预先存在。默认离线，不隐式下载权重或安装依赖。
 当前训练入口仅支持 CPU/单 GPU，不支持未验证的 DDP、断点续训。
 
+字体：Ultralytics 的 `check_font` 只探测 `USER_CONFIG_DIR/Arial.ttf`，即
+`~/.config/Ultralytics/Arial.ttf`；缺失时它会去 ultralytics.com 下载，离线环境下训练会在
+`get_dataset()` 阶段直接报 `Download failure for .../Arial.ttf`。仓库不覆盖 `YOLO_CONFIG_DIR`，
+保持该默认位置；新机器部署时先把字体放到 `~/.config/Ultralytics/Arial.ttf`。仅
+`MPLCONFIGDIR` 仍指向仓库内 `.runtime/matplotlib`（纯缓存，不进 Git）。
+
 ## 数据审查与准备
 
 原始数据保持不变。默认输出目录 `artifacts/` 不进入 Git。
