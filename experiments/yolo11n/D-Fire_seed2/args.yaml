@@ -1,7 +1,7 @@
 task: detect
 mode: train
-model: /home/lxy/Documents/yolo11/Fire-YOLOv11/weights/yolo11n.pt
-data: /home/lxy/Documents/yolo11/Fire-YOLOv11/datasets/D-Fire/data.yaml
+model: /home/cmj/Documents/FireSmoke/Fire-YOLOv11/weights/yolo11n.pt
+data: /home/cmj/Documents/FireSmoke/Fire-YOLOv11/datasets/D-Fire/data.yaml
 epochs: 100
 time: null
 patience: 100
@@ -12,13 +12,13 @@ save_period: -1
 cache: false
 device: '0'
 workers: 8
-project: /home/lxy/Documents/yolo11/Fire-YOLOv11/experiments/yolo11n
-name: D-Fire_seed0-2
+project: /home/cmj/Documents/FireSmoke/Fire-YOLOv11/experiments/yolo11n
+name: D-Fire_seed2-5
 exist_ok: false
 pretrained: true
 optimizer: auto
 verbose: true
-seed: 0
+seed: 2
 deterministic: true
 single_cls: false
 rect: false
@@ -107,4 +107,4 @@ auto_augment: randaugment
 erasing: 0.4
 cfg: null
 tracker: botsort.yaml
-save_dir: /home/lxy/Documents/yolo11/Fire-YOLOv11/experiments/yolo11n/D-Fire_seed0-2
+save_dir: /home/cmj/Documents/FireSmoke/Fire-YOLOv11/experiments/yolo11n/D-Fire_seed2-5
