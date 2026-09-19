@@ -16,6 +16,8 @@
 - [SRDG 候选模块](docs/MODULE_SRDG.md)：P3 语义引导的 P2 残差细节门控、消融与评价边界。
 - [DCBR 下一轮候选](docs/MODULE_DCBR.md)：依据 SRDG seed0 结果设计的细节条件化频带残差，含两个消融。
 - [DCBR 文献检索](docs/RESEARCH_DCBR.md)：七项相关工作、最接近方法与新颖性边界。
+- [ACR 新模块方案](docs/PLAN_ACR.md)：语义局部对齐与多尺度上下文残差，含实验矩阵和论文路线。
+- [ACR 技术验证](docs/ACR_VALIDATION.md)：模块不变量、训练路径、参数量和当前验证边界。
 
 下一轮 DCBR（100 epochs / SGD / batch32 / seed0，默认只预检）：
 
@@ -26,6 +28,19 @@ python scripts/train_dcbr.py --seed 0 --execute
 ```
 
 DCBR 使用 `configs/protocol-dcbr.yaml`，不改变历史 v1/v2 协议；本轮仅验证代码，未训练。
+
+ACR 候选模块（默认只预检）：
+
+```bash
+python scripts/train_acr.py --plan
+python scripts/train_acr.py --seed 0 --dry-run
+# 由研究者主动启动
+python scripts/train_acr.py --seed 0 --execute
+```
+
+ACR 代码位于 `firesmoke/aligned_context.py`，模型配置位于
+`configs/models/yolo11n-p2-acr*.yaml`，消融方法为 `p2_acr_no_align`、
+`p2_acr_uniform` 和 `p2_acr_local`。真实数据 AP、跨域收益和 GPU 部署性能仍需训练工作站验证。
 
 ```bash
 conda activate yolo11

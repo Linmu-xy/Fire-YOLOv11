@@ -14,9 +14,16 @@ from ultralytics.utils.loss import v8DetectionLoss
 
 from .common import NAMES, ROOT, write_json
 from .band_refinement import DetailConditionedBandResidual
+from .aligned_context import AlignedContextResidual
 
 
 def architecture(name):
+    if name.startswith("p2_acr"):
+        modes = {"p2_acr": "full", "p2_acr_no_align": "no_align",
+                 "p2_acr_uniform": "uniform", "p2_acr_local": "local"}
+        if name not in modes:
+            raise ValueError(name)
+        return str(ROOT / "configs/models" / ("yolo11n-" + name.replace("_", "-") + ".yaml"))
     if name == "baseline":
         return str(ULTRA_ROOT / "cfg/models/11/yolo11n.yaml")
     if name == "p2":
@@ -66,6 +73,7 @@ class SemanticResidualDetailGate(nn.Module):
 # graph reproducible from this repository.
 ultralytics_tasks.SemanticResidualDetailGate = SemanticResidualDetailGate
 ultralytics_tasks.DetailConditionedBandResidual = DetailConditionedBandResidual
+ultralytics_tasks.AlignedContextResidual = AlignedContextResidual
 
 
 def shared_transfer(model, source):
