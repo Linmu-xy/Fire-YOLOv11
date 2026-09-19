@@ -74,3 +74,22 @@ FASDD_CV train/val/test：84/46/8。本版本保留这些框并在审查中记�
   误报改善证据。
 - `scripts/train_srdg_seed0.py --dry-run` 完成数据、父级 P2 指纹和环境检查；当前自动化工具环境
   不暴露 CUDA，故 CUDA 项失败且训练被阻断。研究者终端需重新 dry-run，未由本次开发启动训练。
+
+## 2026-09-19：DCBR 与两个内部消融
+
+- 使用 `/home/cmj/miniconda3/envs/yolo11/bin/python`，torch 2.11.0+cu130，ultralytics 8.4.42。
+- `python -m unittest discover -s tests -v`：34 项通过（约 2.5 秒测试主体），未构造训练循环，
+  未执行 optimizer step。临时合成图片测试不属于真实数据集训练/测试。
+- 三个新图都通过正目标/空目标损失及梯度检查；CPU 640×640 前向输出 `[1,6,34000]`，值有限。
+- 同 seed 的父级 P2 及 DCBR 的对应参数和初始推理预测完全一致；输出投影能接收非零梯度。
+- 常量边界、残差分解、逐点修正幅度界、内部消融、state_dict 与完整 checkpoint 加载、
+  YOLO fuse、默认不训练和预检失败阻断均通过。
+- P2/DCBR 都迁移 378 个张量、2,171,791 个元素；DCBR 参数 2,641,832，新增 3,520。
+- Ultralytics `get_flops` 估计 DCBR 10.3221504 GFLOPs@640、P2 10.1378304。
+  THOP 未完整覆盖所有逐点/非线性操作，不能作为完整运算量或实测延迟。
+- `python scripts/train_dcbr.py --seed 0 --dry-run`：21501 张图的数据清单和标签检查通过，
+  配对父级超参/数据/预训练/P2 图指纹通过；当前工具环境 CUDA 检查失败，exit=1 且未训练。
+- 未测 GPU 显存、实际收敛或新模块 AP；新模块在 P2 高分辨率上保留多个中间张量，
+  参数量增幅小不代表显存增幅小。若目标 GPU 显存不足，应先记录失败和内存数据，
+  不悄悄改变候选一侧的 batch/AMP 来维持运行。
+- 文献与设计边界见 `RESEARCH_DCBR.md`、`MODULE_DCBR.md`；未新增实验性能声明。

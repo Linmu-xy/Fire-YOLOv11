@@ -32,6 +32,24 @@ class EvaluationIntegration(unittest.TestCase):
             prediction = output[0] if isinstance(output, tuple) else output
             self.assertTrue(torch.isfinite(prediction).all())
 
+    def test_dcbr_checkpoint_roundtrip_and_fuse(self):
+        with tempfile.TemporaryDirectory() as temp:
+            model = ResearchModel(architecture("p2_dcbr"), nc=2, verbose=False).eval()
+            model.args = get_cfg()
+            model.names = dict(enumerate(NAMES))
+            with torch.no_grad():
+                model.model[25].projection.bias.fill_(0.2)
+            weights = Path(temp) / "dcbr.pt"
+            torch.save({"model": model, "train_args": {"task": "detect", "imgsz": 64},
+                        "epoch": -1}, weights)
+            loaded = load_model(weights)
+            x = torch.rand(1, 3, 64, 96)
+            with torch.inference_mode():
+                expected = model(x)[0]
+                torch.testing.assert_close(loaded.model(x)[0], expected)
+                loaded.model.fuse(verbose=False)
+                torch.testing.assert_close(loaded.model(x)[0], expected, rtol=1e-4, atol=1e-4)
+
     def test_checkpoint_evaluation_artifacts(self):
         torch.set_num_threads(2)
         with tempfile.TemporaryDirectory() as temp:

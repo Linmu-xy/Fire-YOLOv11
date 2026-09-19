@@ -13,6 +13,7 @@ from ultralytics.utils import ROOT as ULTRA_ROOT
 from ultralytics.utils.loss import v8DetectionLoss
 
 from .common import NAMES, ROOT, write_json
+from .band_refinement import DetailConditionedBandResidual
 
 
 def architecture(name):
@@ -22,6 +23,8 @@ def architecture(name):
         return str(ROOT / "configs/models/yolo11n-p2.yaml")
     if name == "p2_srdg":
         return str(ROOT / "configs/models/yolo11n-p2-srdg.yaml")
+    if name in ("p2_dcbr", "p2_dcbr_semantic", "p2_dcbr_whole"):
+        return str(ROOT / "configs/models" / ("yolo11n-" + name.replace("_", "-") + ".yaml"))
     raise ValueError(name)
 
 
@@ -62,6 +65,7 @@ class SemanticResidualDetailGate(nn.Module):
 # the class in memory keeps site-packages unchanged and makes the version-pinned model
 # graph reproducible from this repository.
 ultralytics_tasks.SemanticResidualDetailGate = SemanticResidualDetailGate
+ultralytics_tasks.DetailConditionedBandResidual = DetailConditionedBandResidual
 
 
 def shared_transfer(model, source):

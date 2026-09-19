@@ -14,6 +14,18 @@
 - [验证记录](docs/VALIDATION.md)：本次仅做代码、合成数据与 CPU 检查，不启动训练。
 - [baseline 成对设计记录](docs/NEXT_TRAINING.md)：另一工作站结果同步后的可比性核对规则。
 - [SRDG 候选模块](docs/MODULE_SRDG.md)：P3 语义引导的 P2 残差细节门控、消融与评价边界。
+- [DCBR 下一轮候选](docs/MODULE_DCBR.md)：依据 SRDG seed0 结果设计的细节条件化频带残差，含两个消融。
+- [DCBR 文献检索](docs/RESEARCH_DCBR.md)：七项相关工作、最接近方法与新颖性边界。
+
+下一轮 DCBR（100 epochs / SGD / batch32 / seed0，默认只预检）：
+
+```bash
+python scripts/train_dcbr.py --seed 0 --dry-run
+# 由研究者主动启动
+python scripts/train_dcbr.py --seed 0 --execute
+```
+
+DCBR 使用 `configs/protocol-dcbr.yaml`，不改变历史 v1/v2 协议；本轮仅验证代码，未训练。
 
 ```bash
 conda activate yolo11

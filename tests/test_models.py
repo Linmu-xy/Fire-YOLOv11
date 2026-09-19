@@ -66,7 +66,9 @@ class ModelTests(unittest.TestCase):
     def test_baseline_and_p2_forward_loss_and_shared_initialization(self):
         source = DetectionModel(architecture("baseline"), nc=2, verbose=False)
         for arch, strides in (("baseline", [8, 16, 32]), ("p2", [4, 8, 16, 32]),
-                              ("p2_srdg", [4, 8, 16, 32])):
+                              ("p2_srdg", [4, 8, 16, 32]), ("p2_dcbr", [4, 8, 16, 32]),
+                              ("p2_dcbr_semantic", [4, 8, 16, 32]),
+                              ("p2_dcbr_whole", [4, 8, 16, 32])):
             with self.subTest(arch=arch):
                 model = ResearchModel(architecture(arch), nc=2, verbose=False)
                 model.args = get_cfg()

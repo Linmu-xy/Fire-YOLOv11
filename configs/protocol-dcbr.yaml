@@ -1,0 +1,53 @@
+# DCBR candidate registry; v2 schema, unchanged optimization and data policy.
+protocol: firesmoke-v2
+datasets:
+  dfire:
+    root: datasets/D-Fire
+    layout: dfire
+    source_names: [smoke, fire]
+    invalid_box_policy: exclude_invalid_images
+  fasdd:
+    root: datasets/FASDD_CV
+    layout: fasdd
+    source_names: [fire, smoke]
+    invalid_box_policy: exclude_invalid_images
+prepared_root: artifacts/data
+results_root: outputs
+weights: weights/yolo11n.pt
+seeds: [0, 1, 2]
+methods:
+  baseline: {architecture: baseline, background_alpha: 0.0, style: false}
+  p2: {architecture: p2, background_alpha: 0.0, style: false}
+  p2_srdg: {architecture: p2_srdg, background_alpha: 0.0, style: false}
+  p2_dcbr: {architecture: p2_dcbr, background_alpha: 0.0, style: false}
+  p2_dcbr_semantic: {architecture: p2_dcbr_semantic, background_alpha: 0.0, style: false}
+  p2_dcbr_whole: {architecture: p2_dcbr_whole, background_alpha: 0.0, style: false}
+background_topk: 32
+training:
+  epochs: 100
+  imgsz: 640
+  batch: 32
+  device: '0'
+  workers: 8
+  optimizer: SGD
+  lr0: 0.01
+  lrf: 0.01
+  momentum: 0.937
+  weight_decay: 0.0005
+  warmup_epochs: 3.0
+  patience: 100
+  deterministic: true
+  amp: false
+  close_mosaic: 10
+  mosaic: 1.0
+  mixup: 0.0
+  hsv_h: 0.015
+  hsv_s: 0.7
+  hsv_v: 0.4
+  scale: 0.5
+  translate: 0.1
+  fliplr: 0.5
+  cache: false
+  plots: true
+  save: true
+  val: true

@@ -188,7 +188,7 @@ class ProtocolTests(unittest.TestCase):
 
     def test_all_ablation_plans(self):
         from firesmoke.experiment import plan
-        for config in ("configs/protocol.yaml", "configs/protocol-v2.yaml"):
+        for config in ("configs/protocol.yaml", "configs/protocol-v2.yaml", "configs/protocol-dcbr.yaml"):
             cfg = load_protocol(config)
             for ds in cfg["datasets"]:
                 for method in cfg["methods"]:
