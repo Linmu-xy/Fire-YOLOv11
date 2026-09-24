@@ -23,7 +23,7 @@ lxy论文.txt
 
 # Reproducible research outputs (existing tracked history is retained).
 artifacts/
-outputs/
+# outputs/
 .runtime/
 __pycache__/
 *.py[cod]

@@ -1,0 +1,104 @@
+{
+  "schema": 1,
+  "dataset": "fasdd",
+  "split": "test",
+  "names": [
+    "fire",
+    "smoke"
+  ],
+  "checkpoint_sha256": "2cf4d57b49d1ef7562152527c329e408999ed4a699a49b7ea494dfc25bfd5ddc",
+  "manifest_sha256": "8812786ece22351fa40636d9abe1eb3af9cd8cf2ae51e6fab92571d56288e191",
+  "training_dataset": "dfire",
+  "method": "p2_srdg",
+  "seed": 0,
+  "tag": "module-srdg-v1",
+  "settings": {
+    "imgsz": 640,
+    "confidence_floor": 0.001,
+    "nms_iou": 0.7,
+    "max_det": 300,
+    "augment": false,
+    "half": false,
+    "rect": false
+  },
+  "provenance": {
+    "git_commit": "940a963bbf1e21116e576ca87e80fccb74a00080",
+    "git_status": "",
+    "python": "3.10.20 (main, Mar 11 2026, 17:46:40) [GCC 14.3.0]",
+    "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.35",
+    "versions": {
+      "ultralytics": "8.4.42",
+      "torch": "2.11.0",
+      "torchvision": "0.26.0",
+      "numpy": "2.2.6",
+      "Pillow": "12.2.0",
+      "PyYAML": "6.0.3"
+    },
+    "argv": [
+      "/home/lxy/Documents/yolo11/Fire-YOLOv11/firesmoke/__main__.py",
+      "--config",
+      "configs/protocol-v2.yaml",
+      "evaluate",
+      "--weights",
+      "outputs/module-srdg-v1/dfire/p2_srdg/seed0/weights/best.pt",
+      "--dataset",
+      "fasdd",
+      "--split",
+      "test",
+      "--output",
+      "outputs/zeroshot/srdg_seed0_fasdd_test",
+      "--device",
+      "cpu",
+      "--imgsz",
+      "640",
+      "--batch",
+      "16"
+    ],
+    "source_sha256": {
+      "configs/models/yolo11n-p2-srdg.yaml": "668527ee4fe7bed90a51b035ae2273caeb8b60c1788b920b5928e9acb14d6267",
+      "configs/models/yolo11n-p2.yaml": "08580ccf6306f9fab7b3c67dbe1cd2d8a315c09fdb6c1e633bb350bfb3f7ffc1",
+      "configs/protocol-v2.yaml": "8c0a40802b5c9c5eca24467fbf275a8149ec61924821352b86764ee9205df395",
+      "configs/protocol.yaml": "403dcdb40d479eb4136ea50fc424b9613f0e6d9a3e66de13c308c82e4738b6f8",
+      "firesmoke/__init__.py": "8fe22cf4c7640cc9a26a2c952b870deb419bafa763c3122278a8285023ba131a",
+      "firesmoke/__main__.py": "3129adff95e0f38b87ab34cddfc27082c7892bcaec267ff5d40f160fdf55b44a",
+      "firesmoke/cli.py": "7a52f66a0485c7dfbef717fe9e7344c0efe9ffb60bfae72a3665bfeb78dbe9fc",
+      "firesmoke/common.py": "0a392ad7a194d58d46f9b6948e4c1760ac81ebb3a1337b5ad481e7dffd5b259e",
+      "firesmoke/data.py": "e9d75be80ee9b6948d4cf0ddb0c0652b714e98b445b59edff69597cfd78719c5",
+      "firesmoke/evaluation.py": "bd0662e6894969bf8091f4075ca2bb264dc5d943ea702562599acda7163efc84",
+      "firesmoke/experiment.py": "3ce1a616fd7c73f6f3cef68789cdbefb8e88758cda349a406ea12cf442427a3b",
+      "firesmoke/models.py": "dd4883de25cf13c3ced1b37f42bb435f8bb5c8b1e20f34636cba5fa487182cad",
+      "firesmoke/reliability.py": "33842cc734fea908a51d045a374091c61f9a1ec6414a6febea2b0f84729fa6a7"
+    }
+  },
+  "training_recipe_sha256": "7ccd8d4b8cb7bfb91621b65dd72ad552b3d9de8b0c69a00d851240931faabd31",
+  "training_manifest_sha256": "e57ad5e30981ac7d984290faef7003cdf2df48233fbe9b640a516ffcc3a3a44d",
+  "research_settings": {
+    "architecture": "p2_srdg",
+    "background_alpha": 0.0,
+    "style": false,
+    "topk": 32
+  },
+  "metrics": {
+    "metrics/precision(B)": 0.6909686115335651,
+    "metrics/recall(B)": 0.5557425509316181,
+    "metrics/mAP50(B)": 0.5975736996733622,
+    "metrics/mAP50-95(B)": 0.34324043910897556,
+    "fitness": 0.34324043910897556
+  },
+  "per_class": {
+    "fire": {
+      "precision": 0.7710699883720015,
+      "recall": 0.6667036133894924,
+      "AP50": 0.7390731409853628,
+      "AP50_95": 0.44400333192987
+    },
+    "smoke": {
+      "precision": 0.6108672346951288,
+      "recall": 0.44478148847374366,
+      "AP50": 0.45607425836136145,
+      "AP50_95": 0.24247754628808119
+    }
+  },
+  "image_count": 15884,
+  "note": "Detection AP is uncalibrated. Image alarm calibration is reported separately."
+}
