@@ -40,27 +40,33 @@ Fire-YOLOv11/
 ├── data/                     【数据层】—— 体积大，**永不入库**
 │   ├── raw/                      原始数据集（只读，不要改写）
 │   │   ├── D-Fire/               21527 张，0=smoke, 1=fire
-│   │   └── FASDD_CV/             95314 张，0=fire, 1=smoke
+│   │   ├── FASDD_CV/             95314 张，0=fire, 1=smoke
+│   │   └── FireSmoke-YOLO/        9452 张，0=fire, 1=smoke
 │   └── prepared/                 由 `python -m firesmoke prepare` 生成
-│       ├── dfire/  fasdd/  dfire_hn3/ ...
+│       ├── dfire/  fasdd/  dfire_hn3/ fsyolo/ ...
 │       └── 每个含 images/ labels/ manifest.jsonl data.yaml metadata.json
 │
 ├── weights/                  【权重层】预训练权重（yolo11n.pt / yolo26n.pt）
 │
-├── outputs/                  【产物层】协议原始输出（历史已入库）
+├── outputs/                  【产物层】协议原始输出（已入库）
 │   └── <tag>/<dataset>/<method>/seed<N>/
 │
-├── experiments/              【产物层】训练成功后的归档副本（历史已入库）
+├── experiments/              【产物层】训练成功后的归档副本（已入库）
 │   └── <算法>/<数据集>/
 │
-└── artifacts/                【产物层】审计 / 校验 / 评估产物（不入库）
-    ├── audit/  checks/  eval/
-    └── analysis/
+├── analysis/                 【分析层】诊断 / 统计 / 归因
+│   ├── scripts/                  分析脚本（入库）
+│   ├── reports/                  分析报告与结论（入库）
+│   ├── work/                     分析中间产物（不入库）
+│   └── logs/                     运行日志（不入库）
+│
+└── artifacts/                【产物层】审计 / 校验 / 评估产物（不入库，当前为空）
+    └── audit/  checks/  eval/
 ```
 
 ---
 
-## 2. 七个层的职责（「这个文件该放哪」）
+## 2. 八个层的职责（「这个文件该放哪」）
 
 | 层 | 目录 | 放什么 | 入库 |
 |---|---|---|---|
@@ -72,9 +78,13 @@ Fire-YOLOv11/
 | 数据 | `data/raw/` | 原始数据集 | ❌ |
 | 数据 | `data/prepared/` | prepare 产物（symlink） | ❌ |
 | 权重 | `weights/` | `.pt` 预训练权重 | ✅（现状） |
-| 产物 | `outputs/` | 协议原始输出 | ✅（历史遗留，见 §5） |
-| 产物 | `experiments/` | 归档副本 | ✅（历史遗留，见 §5） |
-| 产物 | `artifacts/` | 审计/评估中间产物 | ❌ |
+| 产物 | `outputs/` | 协议原始输出 | ✅（现状，见 §5） |
+| 产物 | `experiments/` | 归档副本 | ✅（现状，见 §5） |
+| 分析 | `analysis/scripts/` | 诊断 / 统计 / 归因脚本 | ✅ |
+| 分析 | `analysis/reports/` | 分析报告与结论 | ✅ |
+| 分析 | `analysis/work/` | 分析中间产物（可重新生成） | ❌ |
+| 分析 | `analysis/logs/` | 运行日志 | ❌ |
+| 产物 | `artifacts/` | 审计/评估中间产物（当前为空） | ❌ |
 
 **一句话**：**能重新生成的**都不该入库；**人的劳动成果**（代码/配置/文档/结论）才入库。
 
@@ -160,31 +170,32 @@ python -m firesmoke prepare --dataset <dataset>
 
 ---
 
-## 5. .gitignore 与「历史产物仍入库」的现状
+## 5. .gitignore 与产物入库现状
 
-当前 `outputs/`、`experiments/`、`weights/` 下的 **645 个文件早已被 git 跟踪**（占全部跟踪文件的 91%）。
-历史包袱已保留，**但请不要再新增**：
+**现状（2026-10-02 整理后）**：`outputs/`、`experiments/` 下的实验产物**连同 `.pt` 权重与可视化 png/jpg 一并入库**，
+`weights/` 的预训练权重同样入库。全仓库共跟踪 **816** 个文件，其中产物层（`outputs/` + `experiments/` + `weights/`）占 **715** 个。
 
-- `.gitignore` 里 `outputs/` 一行是**注释掉**的（`# outputs/`），因为注释它才能让历史产物继续被跟踪；
-  新增产物会显示为 `??`
-- **例外**：`weights/*.pt`（小且必需）建议保留入库
+- `.gitignore` 里 `outputs/` 一行保持**注释**（`# outputs/`），即不忽略产物目录
+- 不入库：`data/`、`artifacts/`、`analysis/work/`、`analysis/logs/`
 
 **提交前自查**：
 
 ```bash
 git status --short
-git ls-files | wc -l          # 应保持稳定，不应因训练而暴涨
-du -sh .git                   # 历史里曾误入 275 万行的 predictions.json，.git 因此达 359M
+git ls-files | wc -l          # 产物随训练入库，该值会增长，属预期
+du -sh .git                   # ⚠️ 历史曾误入 275 万行的 predictions.json，.git 一度达 359M
 ```
+
+⚠️ **大文件预警**：`predictions.json`、`*.pt` 会让 `.git` 不可逆地膨胀；入库前先确认必要性。
 
 ---
 
 ## 6. 禁止事项（给后人）
 
-1. ❌ **不要把 `data/` 拷进仓库或提交**：16 G，且 `prepared/` 是机器绑定的
+1. ❌ **不要把 `data/` 拷进仓库或提交**：18 G，且 `prepared/` 是机器绑定的
 2. ❌ **不要在 `configs/`、`scripts/` 里新建备份文件**（`*.orig*`、`*.bak`、`*.old`）——备份放项目外
 3. ❌ **不要硬编码 `/home/<用户>/...`**（见 §3.1）
-4. ❌ **不要把权重、可视化 jpg/png、`best.pt` 提交进新产物目录**
+4. ⚠️ **产物（含 `best.pt`、可视化 png/jpg）当前随仓库入库**（见 §5）；新增前留意 `.git` 体积，勿提交 `predictions.json` 这类大文件
 5. ❌ **不要手改 `data/prepared/` 里的 `manifest.jsonl` / `*.txt` / `metadata.json`**：
    `load_prepared()` 会校验 sha256，改了必然报 `Prepared manifest was modified`。要改就重新 prepare
 6. ❌ **不要覆盖 `experiments/` 里的历史归档**：它们是已发表结论的依据（如 `D-Fire_seed0` 与 `D-Fire_p2_seed0` 是配对对照）

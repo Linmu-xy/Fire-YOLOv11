@@ -69,6 +69,7 @@ Fire-YOLOv11/
 ├── weights/                      # 预训练权重
 ├── outputs/                      # 协议原始输出：<tag>/<dataset>/<method>/seed<N>/
 ├── experiments/                  # 训练成功后的归档副本：<算法>/<数据集>/
+├── analysis/                     # 分析层：scripts/ 与 reports/ 入库，work/ 与 logs/ 不入库
 └── artifacts/                    # 审计 / 校验 / 评估产物 —— 不入库
 ```
 
