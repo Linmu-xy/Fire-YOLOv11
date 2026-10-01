@@ -68,7 +68,7 @@ Fire-YOLOv11/
 │   └── prepared/                 # prepare 生成的规范化数据（symlink + manifest，按 <dataset>/ 分）
 ├── weights/                      # 预训练权重
 ├── results/                      # 所有实验结果，按数据集分组：<dataset>/<tag>/<method>/seed<N>/
-└── analysis/                     # 离线分析与审计：scripts / reports / artifacts（不入库）
+└── analysis/                     # 离线分析：scripts/ 与 reports/ 入库；artifacts/、logs/、work/ 不入库
 ```
 
 
