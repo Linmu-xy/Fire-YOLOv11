@@ -36,5 +36,3 @@ analysis/logs/
 analysis/work/
 analysis/artifacts/
 
-# 新产物中的权重不入库（历史已跟踪的不受影响）
-results/**/weights/*.pt
