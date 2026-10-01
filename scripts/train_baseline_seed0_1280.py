@@ -125,7 +125,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--dry-run", action="store_true",
                         help="只完成数据、环境检查，不训练")
     parser.add_argument("--no-archive", action="store_true",
-                        help="训练成功后不复制到 experiments/yolo11n/")
+                        help="（已废弃）结果直接落在 results/<dataset>/<tag>/，不再二次归档")
     args = parser.parse_args(argv)
 
     cfg, spec = spec_for(args.tag)
