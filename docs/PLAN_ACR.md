@@ -74,7 +74,7 @@ python scripts/train_acr.py --seed 0 --execute
 AMP=false，background_alpha=0、style=false；共享 0..22 层预训练，检测头从头初始化。
 默认只预检；--plan 只打印计划，不检查数据/GPU。--execute 预检成功后才训练。
 预检要求同 seed 的 experiments/yolo11n/D-Fire_p2_seedN/run.json；缺失或不匹配会报错。
-新运行写入 outputs/module-acr-v1/dfire/p2_acr/seed0，含 best.pt、results.csv、run.json、
+新运行写入 results/dfire/module-acr-v1/p2_acr/seed0，含 best.pt、results.csv、run.json、
 完整 protocol.yaml；不自动复制大体积归档。已存在的输出不会覆盖，重试使用新 --tag。
 
 ```bash

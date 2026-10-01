@@ -52,7 +52,7 @@ def preflight(cfg, spec, archive):
         notes.append(f"数据清单和标签验证通过: {len(rows)} 张图")
     except Exception as error:
         errors.append(f"数据检查失败: {error}")
-    parent_file = ROOT / f"experiments/yolo11n/D-Fire_p2_seed{spec['seed']}/run.json"
+    parent_file = ROOT / f"results/dfire/paper-v1/p2/seed{spec['seed']}/run.json"
     weights = Path(spec["weights"])
     try:
         parent = json.loads(parent_file.read_text(encoding="utf-8"))
@@ -97,12 +97,9 @@ def main(argv=None):
     args = parser.parse_args(argv)
     cfg = load_protocol(ROOT / CONFIG)
     spec = plan(cfg, "dfire", args.method, args.seed, args.tag)
-    archive = ROOT / f"experiments/yolo11n/D-Fire_{args.method}_seed{args.seed}_{args.tag}"
-    notes, errors = preflight(cfg, spec, None if args.no_archive else archive)
+    notes, errors = preflight(cfg, spec, None)
     print(f"DCBR 候选: {args.method}, seed={args.seed}, tag={args.tag}")
     print(f"输出: {spec['output']}")
-    if not args.no_archive:
-        print(f"成功后归档: {archive}")
     for note in notes:
         print(f"[OK] {note}")
     for error in errors:
@@ -119,9 +116,7 @@ def main(argv=None):
     if subprocess.run(cmd, cwd=ROOT).returncode:
         print("训练未成功结束，保留原始输出，未归档")
         return 1
-    if not args.no_archive:
-        shutil.copytree(spec["output"], archive)
-        print(f"归档完成: {archive}")
+    print(f"结果已落在 {spec['output']}")
     return 0
 
 

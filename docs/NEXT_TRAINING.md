@@ -64,8 +64,8 @@ python scripts/train_baseline_seed0.py --dry-run
 python scripts/train_baseline_seed0.py
 ```
 
-原始输出为 `outputs/paper-v1/dfire/baseline/seed0/`，成功后归档为
-`experiments/yolo11n/D-Fire_protocol_baseline_seed0/`。旧的 `D-Fire_seed0` 是历史实验，不得覆盖或
+原始输出为 `results/dfire/paper-v1/baseline/seed0/`，成功后归档为
+`results/dfire/paper-v1/baseline/seed0/`。旧的 `D-Fire_seed0` 是历史实验，不得覆盖或
 改名冒充协议 baseline。
 
 ## 训练后判读

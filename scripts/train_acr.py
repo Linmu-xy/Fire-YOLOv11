@@ -29,7 +29,7 @@ def main(argv=None):
     parser.add_argument("--seed", type=int, choices=(0, 1, 2), default=0)
     parser.add_argument("--tag", default="module-acr-v1")
     parser.add_argument("--no-archive", action="store_true",
-                        help="训练成功后不复制到 experiments/yolo11n/")
+                        help="（已废弃）结果直接落在 results/<dataset>/<tag>/，不再二次归档")
     action = parser.add_mutually_exclusive_group()
     action.add_argument("--execute", action="store_true")
     action.add_argument("--dry-run", action="store_true")
@@ -37,14 +37,11 @@ def main(argv=None):
     args = parser.parse_args(argv)
     cfg = configuration()
     spec = plan(cfg, "dfire", args.method, args.seed, args.tag)
-    archive = ROOT / f"experiments/yolo11n/D-Fire_{args.method}_seed{args.seed}_{args.tag}"
     print(json.dumps(spec, ensure_ascii=False, indent=2))
-    if not args.no_archive:
-        print(f"成功后归档: {archive}")
     if args.plan:
         return 0
     # The existing launcher checks paired seed, data, weights, graph and optimizer.
-    notes, errors = preflight(cfg, spec, None if args.no_archive else archive)
+    notes, errors = preflight(cfg, spec, None)
     for note in notes:
         print("[OK]", note)
     for error in errors:
@@ -53,9 +50,7 @@ def main(argv=None):
         print("Training not started.")
         return int(bool(errors))
     print(json.dumps(train(cfg, "dfire", args.method, args.seed, args.tag, execute=True), indent=2))
-    if not args.no_archive:
-        shutil.copytree(spec["output"], archive)
-        print(f"归档完成: {archive}")
+    print(f"结果已落在 {spec['output']}")
     return 0
 
 

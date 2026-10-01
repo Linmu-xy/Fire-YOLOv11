@@ -67,10 +67,8 @@ Fire-YOLOv11/
 │   ├── raw/                      # 原始数据集：D-Fire、FASDD_CV、FireSmoke-YOLO
 │   └── prepared/                 # prepare 生成的规范化数据（symlink + manifest，按 <dataset>/ 分）
 ├── weights/                      # 预训练权重
-├── outputs/                      # 协议原始输出：<tag>/<dataset>/<method>/seed<N>/
-├── experiments/                  # 训练成功后的归档副本：<算法>/<数据集>/
-├── analysis/                     # 分析层：scripts/ 与 reports/ 入库，work/ 与 logs/ 不入库
-└── artifacts/                    # 审计 / 校验 / 评估产物 —— 不入库
+├── results/                      # 所有实验结果，按数据集分组：<dataset>/<tag>/<method>/seed<N>/
+└── analysis/                     # 离线分析与审计：scripts / reports / artifacts（不入库）
 ```
 
 
@@ -99,7 +97,7 @@ yolo train model=weights/yolo26n.pt data=data/raw/D-Fire/data.yaml \
 ## 评估（测试集）
 
 ```bash
-yolo val model=experiments/yolo11n/D-Fire/weights/best.pt \
+yolo val model=results/dfire/legacy/D-Fire/weights/best.pt \
   data=data/raw/D-Fire/data.yaml split=test imgsz=640
 ```
 

@@ -28,14 +28,14 @@ python -m unittest discover -s tests -v
 
 ## 数据审查与准备
 
-原始数据保持不变。默认输出目录 `artifacts/` 不进入 Git。
+原始数据保持不变。默认输出目录 `analysis/artifacts/` 不进入 Git。
 
 ```bash
 # 标签、数量、同路径 split 重叠检查；不加载图片像素。
-python -m firesmoke audit --output artifacts/audit/metadata-user
+python -m firesmoke audit --output analysis/artifacts/audit/metadata-user
 
 # 正式论文必须另外完成内容/近重复审查，可能耗时较长。
-python -m firesmoke audit --output artifacts/audit/content-user --hashes --radius 4
+python -m firesmoke audit --output analysis/artifacts/audit/content-user --hashes --radius 4
 
 # 创建软链接图片、独立的统一标签、清单及元数据。
 python -m firesmoke prepare --dataset dfire
@@ -56,8 +56,8 @@ python -m firesmoke prepare --dataset fasdd
 
 ```bash
 python -m firesmoke plan --dataset dfire --method full --seed 0
-python -m firesmoke check-model --method baseline --output artifacts/checks/baseline-user.json
-python -m firesmoke check-model --method full --output artifacts/checks/p2-user.json
+python -m firesmoke check-model --method baseline --output analysis/artifacts/checks/baseline-user.json
+python -m firesmoke check-model --method full --output analysis/artifacts/checks/p2-user.json
 ```
 
 `plan` 不要求准备完数据，不导入训练器。`check-model` 只做随机张量前向、共享权重加载和
@@ -83,7 +83,7 @@ python -m firesmoke train --dataset dfire --method full --seed 0 --tag paper-v1 
 输出示例：
 
 ```text
-outputs/paper-v1/dfire/full/seed0/
+results/dfire/paper-v1/full/seed0/
   run.json                    # 配置、源码哈希、环境、Git、权重/数据清单指纹
   protocol.yaml               # 原始协议快照
   weight_transfer.json        # 实际迁移的权重键
@@ -101,25 +101,25 @@ outputs/paper-v1/dfire/full/seed0/
 
 ```bash
 python -m firesmoke evaluate \
-  --weights outputs/paper-v1/dfire/full/seed0/weights/best.pt \
-  --dataset dfire --split val --device 0 --output artifacts/eval/dfire-full-s0-val
+  --weights results/dfire/paper-v1/full/seed0/weights/best.pt \
+  --dataset dfire --split val --device 0 --output analysis/artifacts/eval/dfire-full-s0-val
 
 python -m firesmoke calibrate \
-  --predictions artifacts/eval/dfire-full-s0-val/predictions.json \
-  --max-fpr 0.01 --output artifacts/eval/dfire-full-s0-calibration.json
+  --predictions analysis/artifacts/eval/dfire-full-s0-val/predictions.json \
+  --max-fpr 0.01 --output analysis/artifacts/eval/dfire-full-s0-calibration.json
 
 python -m firesmoke evaluate \
-  --weights outputs/paper-v1/dfire/full/seed0/weights/best.pt \
-  --dataset dfire --split test --device 0 --output artifacts/eval/dfire-full-s0-test
+  --weights results/dfire/paper-v1/full/seed0/weights/best.pt \
+  --dataset dfire --split test --device 0 --output analysis/artifacts/eval/dfire-full-s0-test
 
 python -m firesmoke evaluate \
-  --weights outputs/paper-v1/dfire/full/seed0/weights/best.pt \
-  --dataset fasdd --split test --device 0 --output artifacts/eval/dfire-to-fasdd-full-s0-test
+  --weights results/dfire/paper-v1/full/seed0/weights/best.pt \
+  --dataset fasdd --split test --device 0 --output analysis/artifacts/eval/dfire-to-fasdd-full-s0-test
 
 python -m firesmoke reliability \
-  --predictions artifacts/eval/dfire-to-fasdd-full-s0-test/predictions.json \
-  --calibration artifacts/eval/dfire-full-s0-calibration.json \
-  --bootstrap 1000 --output artifacts/eval/dfire-to-fasdd-full-s0-reliability.json
+  --predictions analysis/artifacts/eval/dfire-to-fasdd-full-s0-test/predictions.json \
+  --calibration analysis/artifacts/eval/dfire-full-s0-calibration.json \
+  --bootstrap 1000 --output analysis/artifacts/eval/dfire-to-fasdd-full-s0-reliability.json
 ```
 
 同域测试也使用同一源域 calibration 文件。反方向实验在 FASDD 上训练、在 FASDD val 校准、
@@ -134,14 +134,14 @@ python -m firesmoke reliability \
 
 ```bash
 python -m firesmoke summarize \
-  --metrics artifacts/eval/dfire-full-s0-test/metrics.json \
-            artifacts/eval/dfire-full-s1-test/metrics.json \
-            artifacts/eval/dfire-full-s2-test/metrics.json \
-  --output artifacts/tables/dfire-full.json
+  --metrics analysis/artifacts/eval/dfire-full-s0-test/metrics.json \
+            analysis/artifacts/eval/dfire-full-s1-test/metrics.json \
+            analysis/artifacts/eval/dfire-full-s2-test/metrics.json \
+  --output analysis/artifacts/tables/dfire-full.json
 
 python -m firesmoke benchmark \
-  --weights outputs/paper-v1/dfire/full/seed0/weights/best.pt \
-  --device cpu --output artifacts/bench/full-cpu.json
+  --weights results/dfire/paper-v1/full/seed0/weights/best.pt \
+  --device cpu --output analysis/artifacts/bench/full-cpu.json
 ```
 
 汇总要求 seeds 恰好为 0、1、2，拒绝同一权重冒充独立 seed。

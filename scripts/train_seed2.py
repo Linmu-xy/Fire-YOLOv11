@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """yolo11n 在 D-Fire 上的种子训练 —— seed 2。
 
-输出: experiments/yolo11n/D-Fire_seed2/
-参数与基线 experiments/yolo11n/D-Fire/ 完全一致，仅 seed 不同，保证可比。
+输出: results/dfire/legacy/D-Fire_seed2/
+参数与基线 results/dfire/legacy/D-Fire/ 完全一致，仅 seed 不同，保证可比。
 
 运行: python scripts/train_seed2.py
 """

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Run the protocol-controlled D-Fire baseline for seed 0.
 
-This is the paired control for experiments/yolo11n/D-Fire_p2_seed0.  Both arms
+This is the paired control for results/dfire/paper-v1/p2/seed0.  Both arms
 use the canonical D-Fire subset, SGD, AMP disabled, and the same transfer rule:
 shared YOLO11 layers 0..22 are loaded while the Detect head is initialized from
 scratch.  The only intended difference is the detection graph (P3/P4/P5 versus
@@ -30,8 +30,7 @@ METHOD = "baseline"
 SEED = 0
 DEFAULT_TAG = "paper-v1"
 ULTRA_REQUIRED = "8.4.42"
-ARCHIVE = ROOT / "experiments" / "yolo11n" / "D-Fire_protocol_baseline_seed0"
-PAIRED_REFERENCE = ROOT / "experiments" / "yolo11n" / "D-Fire_p2_seed0" / "run.json"
+PAIRED_REFERENCE = ROOT / "results" / "dfire" / "paper-v1" / "p2" / "seed0" / "run.json"
 CRITICAL_SOURCES = (
     "configs/protocol.yaml",
     "firesmoke/data.py",
@@ -95,7 +94,6 @@ def preflight(cfg: dict, spec: dict) -> tuple[list[str], list[str]]:
 
     check(not Path(spec["output"]).exists(),
           f"协议输出目录空闲: {spec['output']}（v1 不覆盖、不续训）")
-    check(not ARCHIVE.exists(), f"归档目录空闲: {ARCHIVE}")
 
     reference = None
     try:
@@ -161,7 +159,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--dry-run", action="store_true",
                         help="只完成数据、环境和成对可比性检查，不训练")
     parser.add_argument("--no-archive", action="store_true",
-                        help="训练成功后不复制到 experiments/yolo11n/")
+                        help="（已废弃）结果直接落在 results/<dataset>/<tag>/，不再二次归档")
     args = parser.parse_args(argv)
 
     cfg, spec = spec_for(args.tag)
@@ -172,7 +170,6 @@ def main(argv: list[str] | None = None) -> int:
           f"background_alpha={research['background_alpha']}, "
           f"style={research['style']}, topk={research['topk']}")
     print(f"  协议输出  : {spec['output']}")
-    print(f"  归档副本  : {ARCHIVE}" + ("（--no-archive）" if args.no_archive else ""))
     print(f"  成对参考  : {PAIRED_REFERENCE}")
 
     report, blocking = preflight(cfg, spec)
@@ -190,13 +187,9 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     if subprocess.run(command(spec), cwd=ROOT).returncode != 0:
-        print("  [ERROR] firesmoke train 非零退出，未归档。")
+        print("  [ERROR] firesmoke train 非零退出。")
         return 1
-    if args.no_archive:
-        print("  [OK ] 训练结束；--no-archive，跳过归档。")
-        return 0
-    shutil.copytree(Path(spec["output"]), ARCHIVE)
-    print(f"  [OK ] 训练结束，已归档到 {ARCHIVE}")
+    print(f"  [OK ] 训练结束；结果已在 {spec['output']}")
     return 0
 
 

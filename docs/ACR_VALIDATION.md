@@ -32,7 +32,7 @@ ultralytics 8.4.42 / ultralytics-thop 2.1.6。训练工作站仍应按其冻结�
 同环境重测 P2 参数量 2,638,312、10.132096 GFLOPs，因此新增 8,908 参数（约 0.338%），
 同 profiler 口径计算量增加约 4.45%。历史 P2 为 10.1378304 GFLOPs，存在 profiler
 版本差异。THOP 不完整计入 softmax、padding、逐点累加等操作，不能代替延迟/显存。
-原始检查 JSON 位于 artifacts/checks/acr-640.json（本地产物，不入 Git）。
+原始检查 JSON 位于 analysis/artifacts/checks/acr-640.json（本地产物，不入 Git）。
 
 --plan 实测通过；--dry-run 在此工作区因缺少数据清单、CUDA、Linux 字体和父级图
 字节指纹匹配而正确返回非零，未训练。本机 Git 的 CRLF 转换可能影响历史 Linux SHA256；

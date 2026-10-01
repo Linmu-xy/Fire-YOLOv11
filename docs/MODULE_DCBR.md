@@ -122,7 +122,7 @@ THOP 对 tanh、abs、拼接、广播等操作覆盖有限，这不是完整算�
 ## 6. 你来执行的训练
 
 使用单独的 `configs/protocol-dcbr.yaml`（沿用 v2 schema），v1/v2 旧配置和旧结果不变。
-启动器按 seed 匹配 `experiments/yolo11n/D-Fire_p2_seed{seed}/run.json`，检查训练超参、初始化、
+启动器按 seed 匹配 `results/dfire/paper-v1/p2/seed{seed}/run.json`，检查训练超参、初始化、
 选择准则、数据 portable 指纹/数量/类别/标签策略、预训练 SHA256、P2 图 SHA256。
 缺少父级证据就报错；不会把两个缺失指纹判断为相同。
 
@@ -137,8 +137,8 @@ python scripts/train_dcbr.py --seed 0 --execute
 
 固定 100 epochs、640、batch32、SGD、lr .01、AMP=false；checkpoint 选 val mAP50-95。
 不从 SRDG 或 P2 best.pt 续训，仍只迁移原始 YOLO11n 的共享层。
-默认原始输出：`outputs/module-dcbr-v1/dfire/p2_dcbr/seed0/`。
-成功后归档：`experiments/yolo11n/D-Fire_p2_dcbr_seed0_module-dcbr-v1/`。
+默认原始输出：`results/dfire/module-dcbr-v1/p2_dcbr/seed0/`。
+成功后归档：`results/dfire/module-dcbr-v1/p2_dcbr/seed0/`。
 归档名包含 tag，重试必须换 `--tag`；不自动覆盖/续训。`--no-archive` 可取消副本。
 
 本地预检的数据、权重与配对协议均通过；工具环境 CUDA 不可用，预检 exit=1 正确阻断。

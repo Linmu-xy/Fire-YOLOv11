@@ -71,8 +71,8 @@ python scripts/train_srdg_seed0.py --dry-run
 python scripts/train_srdg_seed0.py
 ```
 
-默认输出为 `outputs/module-srdg-v1/dfire/p2_srdg/seed0/`，成功后归档至
-`experiments/yolo11n/D-Fire_p2_srdg_seed0/`。训练脚本会检查完整 prepared 数据、父级 P2 的
+默认输出为 `results/dfire/module-srdg-v1/p2_srdg/seed0/`，成功后归档至
+`results/dfire/module-srdg-v1/p2_srdg/seed0/`。训练脚本会检查完整 prepared 数据、父级 P2 的
 portable 数据指纹、样本数、预训练权重和全部训练超参。
 
 ## 判读与后续消融

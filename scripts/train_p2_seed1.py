@@ -3,7 +3,7 @@
 
 结构 = configs/models/yolo11n-p2.yaml（P2/P3/P4/P5 四尺度，纯卷积，无注意力层）。
 流程走论文协议框架 firesmoke：共享层 0..22 迁移 + Detect 头随机初始化、SGD、amp=false。
-协议输出 outputs/paper-v1/dfire/p2/seed1/，跑完归档到 experiments/yolo11n/D-Fire_p2_seed1/。
+结果落在 results/dfire/paper-v1/p2/seed1/（训练成功即最终位置，无二次归档）。
 
 运行: python scripts/train_p2_seed1.py              # 训练
       python scripts/train_p2_seed1.py --dry-run    # 只预览检查与命令

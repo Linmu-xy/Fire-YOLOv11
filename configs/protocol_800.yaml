@@ -2,17 +2,17 @@
 protocol: firesmoke-v1
 datasets:
   dfire:
-    root: datasets/D-Fire
+    root: data/raw/D-Fire
     layout: dfire
     source_names: [smoke, fire]
     invalid_box_policy: exclude_invalid_images
   fasdd:
-    root: datasets/FASDD_CV
+    root: data/raw/FASDD_CV
     layout: fasdd
     source_names: [fire, smoke]
     invalid_box_policy: exclude_invalid_images
-prepared_root: artifacts/data
-results_root: outputs
+prepared_root: data/prepared
+results_root: results
 weights: weights/yolo11n.pt
 seeds: [0, 1, 2]
 methods:

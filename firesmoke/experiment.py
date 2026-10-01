@@ -17,7 +17,7 @@ def plan(cfg, dataset, method, seed, tag="v1"):
         raise ValueError(f"Seed must belong to registered set {cfg['seeds']}")
     if not tag or any(c not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-" for c in tag):
         raise ValueError("tag must contain only letters, digits, underscores or hyphens")
-    out = path(cfg["results_root"]) / tag / dataset / method / f"seed{seed}"
+    out = path(cfg["results_root"]) / dataset / tag / method / f"seed{seed}"
     return {
         "protocol": cfg["protocol"], "dataset": dataset, "method": method, "seed": seed,
         "tag": tag, "research": {**cfg["methods"][method], "topk": cfg["background_topk"]},

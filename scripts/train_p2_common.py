@@ -15,8 +15,7 @@ optimizer=auto + amp=true，初始化政策与优化器和协议不同，结果�
 baseline 混比。
 
 输出：
-  outputs/<tag>/dfire/p2/seed<k>/            协议原始输出（含 run.json，训练前不清理）
-  experiments/yolo11n/D-Fire_p2_seed<k>/     训练成功后的归档副本（可 --no-archive 跳过）
+  results/dfire/<tag>/p2/seed<k>/            训练输出（含 run.json；训练前不清理，成功即最终位置）
 
 用法（直接调用共享实现，需要显式给 seed）:
     python scripts/train_p2_common.py --seed 0 --dry-run
@@ -48,10 +47,6 @@ def spec_for(seed, tag):
     return plan(cfg, DATASET, METHOD, seed, tag)
 
 
-def archive_dir(seed):
-    return ROOT / "experiments" / "yolo11n" / f"D-Fire_{METHOD}_seed{seed}"
-
-
 def command(spec):
     """与 docs/QUICKSTART.md 的 P2 消融命令一致；-m firesmoke 需要 cwd=仓库根。"""
     return [sys.executable, "-m", "firesmoke", "--config", "configs/protocol.yaml", "train",
@@ -74,7 +69,6 @@ def preflight(spec):
           f"（缺失时先运行 python -m firesmoke prepare --dataset {DATASET}）")
     check(not Path(spec["output"]).exists(),
           f"协议输出目录空闲: {spec['output']}（已存在请换 --tag；v1 不覆盖也不续训）")
-    check(not archive_dir(spec["seed"]).exists(), f"归档目录空闲: {archive_dir(spec['seed'])}")
 
     try:
         import importlib.metadata
@@ -108,7 +102,7 @@ def main(seed, argv=None):
     parser.add_argument("--tag", default=DEFAULT_TAG, help=f"输出 tag（默认 {DEFAULT_TAG}）")
     parser.add_argument("--dry-run", action="store_true", help="只打印检查结果和将执行的命令，不训练")
     parser.add_argument("--no-archive", action="store_true",
-                        help=f"不复制结果到 experiments/yolo11n/D-Fire_{METHOD}_seed{seed}/")
+                        help="（已废弃）结果直接落在 results/<dataset>/<tag>/，不再二次归档；保留此参数仅为兼容旧命令")
     args = parser.parse_args(argv)
 
     spec = spec_for(seed, args.tag)
@@ -117,8 +111,7 @@ def main(seed, argv=None):
     print(f"  图        : {GRAPH}（architecture={research['architecture']}, "
           f"background_alpha={research['background_alpha']}, style={research['style']}, "
           f"topk={research['topk']}）")
-    print(f"  协议输出  : {spec['output']}")
-    print(f"  归档副本  : {archive_dir(seed)}" + ("（--no-archive）" if args.no_archive else ""))
+    print(f"  协议输出  : {spec['output']}（训练成功后即最终位置）")
 
     report, blocking = preflight(spec)
     print("  检查:")
@@ -135,18 +128,10 @@ def main(seed, argv=None):
         return 1
 
     if subprocess.run(command(spec), cwd=ROOT).returncode != 0:
-        print("  [ERROR] firesmoke train 非零退出，未归档。")
+        print("  [ERROR] firesmoke train 非零退出。")
         return 1
 
-    if args.no_archive:
-        print("  [OK ] 训练结束；--no-archive，跳过归档。")
-        return 0
-    destination = archive_dir(seed)
-    if destination.exists():
-        print(f"  [WARN] 归档目标已存在，跳过复制: {destination}")
-        return 0
-    shutil.copytree(Path(spec["output"]), destination)
-    print(f"  [OK ] 训练结束，已归档到 {destination}")
+    print(f"  [OK ] 训练结束；结果已落在 {spec['output']}")
     return 0
 
 

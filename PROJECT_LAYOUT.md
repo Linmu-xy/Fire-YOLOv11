@@ -3,7 +3,7 @@
 > 本文档是仓库的**结构契约**。新增文件前请先读本页，按「存放规范」放置；
 > 不确定时**先问**，不要随手在根目录或 `configs/` 里新建文件。
 >
-> 最后更新：2026-10-02（数据层由 `datasets/` + `artifacts/data/` 归并为 `data/`）
+> 最后更新：2026-10-02（第二次整理：`outputs/` + `experiments/` 合并为 `results/`；`artifacts/` 并入 `analysis/`）
 
 ---
 
@@ -19,20 +19,20 @@ Fire-YOLOv11/
 │
 ├── configs/                  【配置层】
 │   ├── protocol.yaml             主实验协议（唯一配置源）
-│   ├── protocol_*.yaml           历史/变体协议（如 protocol_800/960/1280）
+│   ├── protocol_*.yaml           历史变体协议（800 / 960 / v2 / dcbr，被脚本引用，勿删）
 │   └── models/                   模型结构定义（如 yolo11n-p2.yaml）
 │
 ├── firesmoke/                【代码层】核心 Python 包
 │   ├── data.py                   数据清点 / 规范化 / 校验
-│   ├── experiment.py             训练编排
+│   ├── experiment.py             训练编排（输出路径公式在此）
 │   ├── evaluation.py             评估与校准
-│   ├── cli.py, common.py, models.py, ...
+│   └── cli.py, common.py, models.py, ...
 │
 ├── scripts/                  【代码层】可执行脚本
 │   ├── train_p2_common.py        参数化训练启动器（推荐入口）
 │   ├── train_acr.py / train_dcbr.py / train_srdg_seed0.py
 │   ├── prepare_dataset.py        D-Fire 初始划分（历史记录，需 --src）
-│   └── train_*.py                各实验的薄封装
+│   └── train_baseline_seed0*.py  基线各分辨率变体
 │
 ├── docs/                     【文档层】方法 / 协议 / 验证说明
 ├── tests/                    【测试层】单元测试
@@ -40,33 +40,35 @@ Fire-YOLOv11/
 ├── data/                     【数据层】—— 体积大，**永不入库**
 │   ├── raw/                      原始数据集（只读，不要改写）
 │   │   ├── D-Fire/               21527 张，0=smoke, 1=fire
-│   │   ├── FASDD_CV/             95314 张，0=fire, 1=smoke
-│   │   └── FireSmoke-YOLO/        9452 张，0=fire, 1=smoke
+│   │   └── FASDD_CV/             95314 张，0=fire, 1=smoke
 │   └── prepared/                 由 `python -m firesmoke prepare` 生成
-│       ├── dfire/  fasdd/  dfire_hn3/ fsyolo/ ...
+│       ├── dfire/  fasdd/  dfire_hn3/ ...
 │       └── 每个含 images/ labels/ manifest.jsonl data.yaml metadata.json
 │
 ├── weights/                  【权重层】预训练权重（yolo11n.pt / yolo26n.pt）
 │
-├── outputs/                  【产物层】协议原始输出（已入库）
-│   └── <tag>/<dataset>/<method>/seed<N>/
+├── results/                  【结果层】所有实验结果，**按数据集分组**
+│   └── <dataset>/<tag>/<method>/seed<N>/
+│       ├── dfire/paper-v1/p2/seed0/           ← 协议训练输出，成功即最终位置
+│       ├── dfire/paper-v1_960/baseline/seed0/
+│       ├── dfire/module-dcbr-v1/p2_dcbr/seed0/
+│       ├── dfire/legacy/D-Fire_seed0/         ← 早期 ultralytics 直跑，无 tag
+│       └── fasdd/zeroshot/srdg_seed0_fasdd_test/
 │
-├── experiments/              【产物层】训练成功后的归档副本（已入库）
-│   └── <算法>/<数据集>/
-│
-├── analysis/                 【分析层】诊断 / 统计 / 归因
-│   ├── scripts/                  分析脚本（入库）
-│   ├── reports/                  分析报告与结论（入库）
-│   ├── work/                     分析中间产物（不入库）
-│   └── logs/                     运行日志（不入库）
-│
-└── artifacts/                【产物层】审计 / 校验 / 评估产物（不入库，当前为空）
-    └── audit/  checks/  eval/
+└── analysis/                 【分析层】离线分析与审计（不属于训练结果）
+    ├── scripts/                  分析脚本
+    ├── reports/                  分析结论（.md）
+    ├── artifacts/                中间产物（json/report）
+    ├── logs/                     运行日志（不入库）
+    └── work/                     中间工作目录（不入库）
 ```
+
+**一级目录共 9 个**：`configs` `data` `docs` `firesmoke` `results` `scripts` `tests` `weights` `analysis`
+每个都有**唯一职责**，不允许再新增功能重叠的一级目录。
 
 ---
 
-## 2. 八个层的职责（「这个文件该放哪」）
+## 2. 各层职责（「这个文件该放哪」）
 
 | 层 | 目录 | 放什么 | 入库 |
 |---|---|---|---|
@@ -77,14 +79,9 @@ Fire-YOLOv11/
 | 测试 | `tests/` | 单元测试 | ✅ |
 | 数据 | `data/raw/` | 原始数据集 | ❌ |
 | 数据 | `data/prepared/` | prepare 产物（symlink） | ❌ |
-| 权重 | `weights/` | `.pt` 预训练权重 | ✅（现状） |
-| 产物 | `outputs/` | 协议原始输出 | ✅（现状，见 §5） |
-| 产物 | `experiments/` | 归档副本 | ✅（现状，见 §5） |
-| 分析 | `analysis/scripts/` | 诊断 / 统计 / 归因脚本 | ✅ |
-| 分析 | `analysis/reports/` | 分析报告与结论 | ✅ |
-| 分析 | `analysis/work/` | 分析中间产物（可重新生成） | ❌ |
-| 分析 | `analysis/logs/` | 运行日志 | ❌ |
-| 产物 | `artifacts/` | 审计/评估中间产物（当前为空） | ❌ |
+| 权重 | `weights/` | `.pt` 预训练权重 | ✅ |
+| 结果 | `results/` | **所有**训练/评估结果 | ✅（历史遗留，见 §5） |
+| 分析 | `analysis/` | 离线分析脚本、报告、中间产物 | 部分 |
 
 **一句话**：**能重新生成的**都不该入库；**人的劳动成果**（代码/配置/文档/结论）才入库。
 
@@ -97,7 +94,6 @@ Fire-YOLOv11/
 ```python
 # ❌ 错：换台机器就废
 SRC = Path("/home/lxy/Documents/yolo11/D-Fire(1)")
-DST = Path("/home/lxy/Documents/yolo11/Fire-YOLOv11/datasets/D-Fire")
 
 # ✅ 对：从仓库根推导
 ROOT = Path(__file__).resolve().parent.parent
@@ -121,11 +117,23 @@ datasets:
   dfire:  {root: data/raw/D-Fire}
   fasdd:  {root: data/raw/FASDD_CV}
 prepared_root: data/prepared
-results_root: outputs
+results_root: results            # 输出公式: results/<dataset>/<tag>/<method>/seed<N>/
 weights: weights/yolo11n.pt
 ```
 
-### 3.3 ⚠️ `data/prepared/` 里的 manifest 存的是**绝对路径**
+> ⚠️ `configs/protocol_800.yaml`、`protocol_960.yaml`、`protocol-v2.yaml`、`protocol-dcbr.yaml` 是**仍被脚本引用**的历史变体（`train_baseline_seed0_800/960.py`、`train_acr.py`、`train_srdg_seed0.py`、`train_dcbr.py`、`tests/`），**不要删除**；它们的路径项必须与主协议保持同步。
+
+### 3.3 训练结果没有"二次归档"
+
+输出公式（`firesmoke/experiment.py:plan()`）：
+
+```
+results/<dataset>/<tag>/<method>/seed<N>/
+```
+
+**训练成功时这里就是最终位置**。历史上曾有 `outputs/`（原始输出）+ `experiments/`（归档副本）两份拷贝，已于 2026-10-02 合并，`scripts/` 里的 `--no-archive` 参数已废弃（保留仅为兼容旧命令，不再有行为）。
+
+### 3.4 ⚠️ `data/prepared/` 里的 manifest 存的是**绝对路径**
 
 `manifest.jsonl`、`train.txt`、`val.txt`、`test.txt`、`data.yaml` 都会写入**当时的绝对路径**。
 这意味着：
@@ -140,10 +148,10 @@ python -m firesmoke prepare --dataset <dataset>
 ```
 
 - 划分由 `data/raw/<dataset>/images/{train,val,test}` 的目录结构决定，**结果确定**，重跑不会改变 train/val/test 成员
-- 因此 `outputs/`、`experiments/` 里的历史实验**仍然可比**，无需重训
+- 因此 `results/` 里的历史实验**仍然可比**，无需重训
 - ⚠️ 但**不要**把 `data/prepared/` 拷给别人：跨机器路径必然不同，对方必须自己重新 prepare
 
-### 3.4 新增数据集
+### 3.5 新增数据集
 
 1. 把原始数据放到 `data/raw/<名字>/`（保持 `images/{train,val,test}` + `labels/{train,val,test}` 结构）
 2. 在 `configs/protocol.yaml` 的 `datasets:` 下加一条：`root` / `layout` / `source_names` / `invalid_box_policy`
@@ -156,50 +164,52 @@ python -m firesmoke prepare --dataset <dataset>
 
 | 对象 | 规范 | 示例 |
 |---|---|---|
+| 结果目录 | `results/<dataset>/<tag>/<method>/seed<N>/` | `results/dfire/paper-v1/p2/seed0/` |
 | 协议文件 | `protocol.yaml` 为主，变体 `protocol_<参数>.yaml` | `protocol_960.yaml` |
 | 输出 tag | `<阶段>-v<版本>`，变体接 `_<参数>` | `paper-v1`、`paper-v1_960` |
-| 实验归档 | `<数据集>_<方法>_seed<N>[_<模块tag>]` | `D-Fire_p2_dcbr_seed0_module-dcbr-v1` |
+| 方法名 | `<方法>_<模块>` | `p2_dcbr`、`p2_srdg`、`p2_acr` |
 | 脚本 | `train_<方法>[_<参数>].py` | `train_baseline_seed0_960.py` |
 | 文档 | 全大写 + 下划线 | `MODULE_DCBR.md` |
+| 早期遗留 | 统一放 `results/dfire/legacy/<原名>/` | `results/dfire/legacy/D-Fire_seed0/` |
 
-**避免**（历史遗留，新文件不要这样）：
+**避免**（历史教训，新文件不要这样）：
 
-- 把参数塞进目录名后不再维护（`paper-v1_800` vs `paper-v1_960` 并存且无索引）
-- 备份文件留在配置目录（`configs/protocol.yaml.orig_20261001` ❌ → 备份一律放项目外）
-- 权重放在 `scripts/`（`scripts/yolo26n.pt` ❌ → 统一放 `weights/`）
+- ❌ 同一份结果存两份（旧 `outputs/` + `experiments/` 就是这个问题，已合并）
+- ❌ 把备份文件留在配置目录（`configs/protocol.yaml.orig_*`）→ 备份一律放**项目外**
+- ❌ 权重放在 `scripts/`（旧 `scripts/yolo26n.pt` ❌）→ 统一放 `weights/`
+- ❌ 在一个目录名里堆砌参数且无索引（`paper-v1_800` vs `paper-v1_960` 并存时，必须在 `docs/` 里说明差异）
 
 ---
 
-## 5. .gitignore 与产物入库现状
+## 5. .gitignore 与「历史产物仍入库」的现状
 
-**现状（2026-10-02 整理后）**：`outputs/`、`experiments/` 下的实验产物**连同 `.pt` 权重与可视化 png/jpg 一并入库**，
-`weights/` 的预训练权重同样入库。全仓库共跟踪 **816** 个文件，其中产物层（`outputs/` + `experiments/` + `weights/`）占 **715** 个。
+`results/` 下的文件**早已被 git 跟踪**（历史包袱，保留现状）。**但请不要再新增**：
 
-- `.gitignore` 里 `outputs/` 一行保持**注释**（`# outputs/`），即不忽略产物目录
-- 不入库：`data/`、`artifacts/`、`analysis/work/`、`analysis/logs/`
+- `.gitignore` 里 `# outputs/` 一行是**注释掉**的（注释它才能让历史产物继续被跟踪）；新增产物会显示为 `??`
+- `analysis/logs/`、`analysis/work/`、`analysis/artifacts/` 已被忽略
+- `data/`、`artifacts/`（已不存在）被整体忽略
 
 **提交前自查**：
 
 ```bash
 git status --short
-git ls-files | wc -l          # 产物随训练入库，该值会增长，属预期
-du -sh .git                   # ⚠️ 历史曾误入 275 万行的 predictions.json，.git 一度达 359M
+git ls-files | wc -l          # 应保持稳定，不应因训练而暴涨
+du -sh .git                   # 历史里曾误入 275 万行的 predictions.json，.git 因此达 300M+
 ```
-
-⚠️ **大文件预警**：`predictions.json`、`*.pt` 会让 `.git` 不可逆地膨胀；入库前先确认必要性。
 
 ---
 
 ## 6. 禁止事项（给后人）
 
-1. ❌ **不要把 `data/` 拷进仓库或提交**：18 G，且 `prepared/` 是机器绑定的
+1. ❌ **不要把 `data/` 拷进仓库或提交**：16 G+，且 `prepared/` 是机器绑定的
 2. ❌ **不要在 `configs/`、`scripts/` 里新建备份文件**（`*.orig*`、`*.bak`、`*.old`）——备份放项目外
 3. ❌ **不要硬编码 `/home/<用户>/...`**（见 §3.1）
-4. ⚠️ **产物（含 `best.pt`、可视化 png/jpg）当前随仓库入库**（见 §5）；新增前留意 `.git` 体积，勿提交 `predictions.json` 这类大文件
+4. ❌ **不要把权重、可视化 jpg/png、`best.pt` 提交进新产物目录**
 5. ❌ **不要手改 `data/prepared/` 里的 `manifest.jsonl` / `*.txt` / `metadata.json`**：
    `load_prepared()` 会校验 sha256，改了必然报 `Prepared manifest was modified`。要改就重新 prepare
-6. ❌ **不要覆盖 `experiments/` 里的历史归档**：它们是已发表结论的依据（如 `D-Fire_seed0` 与 `D-Fire_p2_seed0` 是配对对照）
-7. ❌ **不要在项目目录内放备份**（`backups/`）——放项目同级的外部目录
+6. ❌ **不要覆盖 `results/` 里的历史结果**：它们是已发表结论的依据（如 `paper-v1/baseline/seed0` 与 `paper-v1/p2/seed0` 是配对对照）。v1 协议本身也会拒绝写入已存在的输出目录
+7. ❌ **不要在项目目录内放备份或临时目录**（旧 `backups/`、旧 `runs/`）——放项目同级的外部目录
+8. ❌ **不要再新增与现有 9 个一级目录职责重叠的目录**
 
 ---
 
@@ -231,7 +241,7 @@ python -m firesmoke prepare --dataset dfire
 python -m firesmoke prepare --dataset fasdd
 
 # 数据审计
-python -m firesmoke audit --datasets dfire fasdd --output artifacts/audit/metadata
+python -m firesmoke audit --datasets dfire fasdd --output analysis/artifacts/audit/metadata
 
 # 训练（协议化入口）
 python scripts/train_p2_common.py --seed 0 --dry-run     # 预检
@@ -248,11 +258,11 @@ python -m unittest discover -s tests -v
 结构调整（移动/重命名目录、改 `protocol.yaml` 的路径项）会**影响所有历史实验的可读性**，必须：
 
 1. 先在项目**外**做全量备份（`rsync -a <repo>/ <外部目录>/`）
-2. 改 `configs/protocol.yaml` + 相关 `scripts/` 硬编码 + 本文件 + `README.md`
-3. 重新 `prepare` 并验证：
+2. 改 `configs/protocol*.yaml`（主协议 + 4 个被引用的变体）+ 相关 `scripts/` 硬编码 + 本文件 + `README.md` + `docs/`
+3. 验证三点：
    ```bash
-   python -c "from firesmoke.data import load_prepared, load_protocol; \
-   cfg=load_protocol('configs/protocol.yaml'); \
-   [print(ds, len(load_prepared(cfg, ds)[2])) for ds in cfg['datasets']]"
+   python -m unittest discover -s tests                       # 单测
+   python scripts/train_p2_common.py --seed 0 --dry-run        # 输出路径是否落在新位置
+   grep -rn "outputs/\|experiments/" firesmoke scripts docs    # 不应有旧路径残留
    ```
 4. 两台机器都要做，且 `git pull` 后各自重新 `prepare`

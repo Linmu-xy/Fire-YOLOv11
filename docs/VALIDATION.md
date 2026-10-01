@@ -51,10 +51,10 @@ FASDD_CV train/val/test：84/46/8。本版本保留这些框并在审查中记�
 
 开发时本地产物（不入 Git）：
 
-- `artifacts/audit/metadata-v1/audit.json`
-- `artifacts/audit/metadata-v1/label_issues.json`
-- `artifacts/checks/baseline-forward.json`
-- `artifacts/checks/p2-forward.json`
+- `analysis/artifacts/audit/metadata-v1/audit.json`
+- `analysis/artifacts/audit/metadata-v1/label_issues.json`
+- `analysis/artifacts/checks/baseline-forward.json`
+- `analysis/artifacts/checks/p2-forward.json`
 
 ## 未验证内容
 

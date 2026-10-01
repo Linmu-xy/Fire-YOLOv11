@@ -26,7 +26,6 @@ SEED = 0
 DEFAULT_TAG = "paper-v1_960"
 ULTRA_REQUIRED = "8.4.42"
 
-ARCHIVE = ROOT / "experiments" / "yolo11n" / "D-Fire_protocol_baseline_960_seed0"
 
 CRITICAL_SOURCES = (
     "configs/protocol_960.yaml",
@@ -90,7 +89,6 @@ def preflight(cfg: dict, spec: dict) -> tuple[list[str], list[str]]:
 
     check(not Path(spec["output"]).exists(),
           f"协议输出目录空闲: {spec['output']}（v1 不覆盖、不续训）")
-    check(not ARCHIVE.exists(), f"归档目录空闲: {ARCHIVE}")
 
     try:
         version = importlib.metadata.version("ultralytics")
@@ -125,7 +123,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--dry-run", action="store_true",
                         help="只完成数据、环境检查，不训练")
     parser.add_argument("--no-archive", action="store_true",
-                        help="训练成功后不复制到 experiments/yolo11n/")
+                        help="（已废弃）结果直接落在 results/<dataset>/<tag>/，不再二次归档")
     args = parser.parse_args(argv)
 
     cfg, spec = spec_for(args.tag)
@@ -137,7 +135,6 @@ def main(argv: list[str] | None = None) -> int:
           f"background_alpha={research['background_alpha']}, "
           f"style={research['style']}, topk={research['topk']}")
     print(f"  协议输出  : {spec['output']}")
-    print(f"  归档副本  : {ARCHIVE}" + ("（--no-archive）" if args.no_archive else ""))
 
     report, blocking = preflight(cfg, spec)
     print("  检查:")
@@ -155,15 +152,9 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     if subprocess.run(command(spec), cwd=ROOT).returncode != 0:
-        print("  [ERROR] firesmoke train 非零退出，未归档。")
+        print("  [ERROR] firesmoke train 非零退出。")
         return 1
-
-    if args.no_archive:
-        print("  [OK ] 训练结束；--no-archive，跳过归档。")
-        return 0
-
-    shutil.copytree(Path(spec["output"]), ARCHIVE)
-    print(f"  [OK ] 训练结束，已归档到 {ARCHIVE}")
+    print(f"  [OK ] 训练结束；结果已在 {spec['output']}")
     return 0
 
 
