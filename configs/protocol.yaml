@@ -2,16 +2,27 @@
 protocol: firesmoke-v1
 datasets:
   dfire:
-    root: datasets/D-Fire
+    root: data/raw/D-Fire
     layout: dfire
     source_names: [smoke, fire]
     invalid_box_policy: exclude_invalid_images
   fasdd:
-    root: datasets/FASDD_CV
+    root: data/raw/FASDD_CV
     layout: fasdd
     source_names: [fire, smoke]
     invalid_box_policy: exclude_invalid_images
-prepared_root: artifacts/data
+  # Hard-negative 加强版(G2 实验组): train 划分内的纯背景图在 manifest 中重复 3 次。
+  # 目的: 提高背景梯度权重, 让模型学到「红色/橙色物体(红花、红发、暖色灯带)不是火」。
+  # 只在 train 生效 —— val 与 test 保持每张图一次, 否则 background_alarm_fraction
+  # 这类按图像求均值的指标会被重复行偏置。
+  # 预期: train 从 15,485 行 -> 15,485 + 7,043×2 = 29,571 行(val 1,722 / test 4,294 不变)
+  dfire_hn3:
+    root: data/raw/D-Fire
+    layout: dfire
+    source_names: [smoke, fire]
+    invalid_box_policy: exclude_invalid_images
+    neg_repeat: 3
+prepared_root: data/prepared
 results_root: outputs
 weights: weights/yolo11n.pt
 seeds: [0, 1, 2]

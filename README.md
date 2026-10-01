@@ -54,28 +54,24 @@ python -m unittest discover -s tests -v
 
 ## 目录结构
 
+完整结构、各目录职责与存放规范见 **[PROJECT_LAYOUT.md](PROJECT_LAYOUT.md)**。简版：
+
 ```
 Fire-YOLOv11/
-├── datasets/                     # 数据集（各算法共享，只读）
-│   ├── D-Fire/                   # 21527 张，类别 0=smoke, 1=fire
-│   │   ├── images/{train,val,test}/
-│   │   ├── labels/{train,val,test}/
-│   │   └── data.yaml
-│   └── FASDD_CV/                 # 95314 张，类别 0=fire, 1=smoke
-│       ├── images/
-│       ├── annotations/YOLO_CV/{labels,train.txt,val.txt,test.txt}
-│       └── data.yaml
+├── configs/                      # 实验协议 protocol*.yaml + configs/models/ 模型定义
+├── docs/                         # 方法 / 协议 / 验证文档
+├── firesmoke/                    # 核心 Python 包（协议实现：数据、训练、评估、校准）
+├── scripts/                      # 可执行脚本（训练启动器、数据整理）
+├── tests/                        # 单元测试
+├── data/                         # 数据层 —— 不入库
+│   ├── raw/                      # 原始数据集：D-Fire、FASDD_CV、FireSmoke-YOLO
+│   └── prepared/                 # prepare 生成的规范化数据（symlink + manifest，按 <dataset>/ 分）
 ├── weights/                      # 预训练权重
-│   ├── yolo11n.pt
-│   └── yolo26n.pt
-├── experiments/                  # 实验结果，按 <算法>/<数据集>/ 分开
-│   └── yolo11n/D-Fire/
-│       ├── results.csv
-│       ├── results.png / *PR_curve.png / confusion_matrix*.png
-│       └── weights/{best.pt,last.pt}
-└── scripts/
-    └── prepare_dataset.py        # D-Fire 划分脚本（历史记录，原始数据已清理）
+├── outputs/                      # 协议原始输出：<tag>/<dataset>/<method>/seed<N>/
+├── experiments/                  # 训练成功后的归档副本：<算法>/<数据集>/
+└── artifacts/                    # 审计 / 校验 / 评估产物 —— 不入库
 ```
+
 
 ## 环境
 
@@ -89,12 +85,12 @@ conda activate yolo11     # ultralytics 8.4.42, torch 2.11.0+cu130
 
 ```bash
 # yolo11n on D-Fire
-yolo train model=weights/yolo11n.pt data=datasets/D-Fire/data.yaml \
+yolo train model=weights/yolo11n.pt data=data/raw/D-Fire/data.yaml \
   epochs=100 imgsz=640 batch=32 device=0 workers=8 \
   project=experiments/yolo11n name=D-Fire
 
 # yolo26n on D-Fire
-yolo train model=weights/yolo26n.pt data=datasets/D-Fire/data.yaml \
+yolo train model=weights/yolo26n.pt data=data/raw/D-Fire/data.yaml \
   epochs=100 imgsz=640 batch=32 device=0 workers=8 \
   project=experiments/yolo26n name=D-Fire
 ```
@@ -103,7 +99,7 @@ yolo train model=weights/yolo26n.pt data=datasets/D-Fire/data.yaml \
 
 ```bash
 yolo val model=experiments/yolo11n/D-Fire/weights/best.pt \
-  data=datasets/D-Fire/data.yaml split=test imgsz=640
+  data=data/raw/D-Fire/data.yaml split=test imgsz=640
 ```
 
 ## 历史验证集结果（不是独立测试集结果）
@@ -123,5 +119,5 @@ yolo val model=experiments/yolo11n/D-Fire/weights/best.pt \
    - `FASDD_CV`：`0=fire`, `1=smoke`
 2. **D-Fire 含 9838 张背景图**（空标签文件），是官方 "None" 类，属正常样本。
 3. **离线环境已本地化**：预训练权重放在 `weights/`，Arial 字体放在 `~/.config/Ultralytics/Arial.ttf`（来自 Liberation Sans），无需联网。该路径是 Ultralytics 的默认 `USER_CONFIG_DIR`，仓库不覆盖 `YOLO_CONFIG_DIR`；若把配置目录改到别处，训练会因找不到字体去联网下载而失败。
-4. `datasets/FASDD_CV/annotations/YOLO_CV/images` 是指向 `../../images` 的软链，供 `train.txt` 里的 `./images/...` 解析，**移动数据集时整个目录一起移动即可保持有效**。
+4. `data/raw/FASDD_CV/annotations/YOLO_CV/images` 是指向 `../../images` 的软链，供 `train.txt` 里的 `./images/...` 解析，**移动数据集时整个目录一起移动即可保持有效**。
 5. 训练命令用 `yolo train`，不要用旧的 `yolo detect train` —— 后者会自动插入一层 `detect/` 目录，导致输出路径变成 `runs/detect/...`。

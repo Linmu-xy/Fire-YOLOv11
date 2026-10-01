@@ -1,27 +1,30 @@
 #!/usr/bin/env python3
-"""把 D-Fire 原始数据集按 9:1 切分并整理为 datasets/D-Fire（图片 + 标签严格一一对应）。
+"""把 D-Fire 原始数据集按 9:1 切分并整理为 data/raw/D-Fire（图片 + 标签严格一一对应）。
 
 【历史记录 / 可复现说明】
-本脚本用于最初的整理。执行时原始数据位于 /home/lxy/Documents/yolo11/D-Fire(1)/
+本脚本用于最初的整理。执行时原始数据位于发起者机器上的 D-Fire(1)/
 （train 17221 + test 4306）。整理完成并校验通过后，原始目录及其 zip 已按计划清理，
-全部 21527 张图片均已并入 datasets/D-Fire/，无数据丢失。
-如需重跑，请先把原始 D-Fire 数据恢复到 SRC 所指位置。
+全部 21527 张图片均已并入 data/raw/D-Fire/，无数据丢失。
+如需重跑，请先把原始 D-Fire 数据恢复到 --src 所指位置。
 
 划分规则：
   - 原始 train (17221) -> 按 9:1 随机切分为 train(15499) / val(1722)，seed 固定可复现
   - 原始 test  (4306)  -> 原样作为 test
 类别沿用 D-Fire 官方定义：0 = smoke, 1 = fire
 
-用法: python prepare_dataset.py
+用法: python scripts/prepare_dataset.py --src <原始 D-Fire 目录> [--dst data/raw/D-Fire]
+说明: 不硬编码任何机器路径；--dst 缺省为 <repo>/data/raw/D-Fire。
 """
 from __future__ import annotations
 
+import argparse
 import random
 import shutil
 from pathlib import Path
 
-SRC = Path("/home/lxy/Documents/yolo11/D-Fire(1)")  # 原始数据（已清理）
-DST = Path("/home/lxy/Documents/yolo11/Fire-YOLOv11/datasets/D-Fire")
+ROOT = Path(__file__).resolve().parent.parent  # <repo>/
+SRC = ROOT / "data/raw/D-Fire(1)"   # 占位，实际由 --src 指定
+DST = ROOT / "data/raw/D-Fire"
 SEED = 0
 VAL_RATIO = 0.1
 IMG_EXT = ".jpg"
@@ -53,7 +56,23 @@ def copy_split(split_src: str, split_dst: str, names: list[str]) -> None:
     print(f"  {split_dst:5s} <- {split_src:5s}: {len(names)} 对 (图+标签)")
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--src", required=True, type=Path,
+                        help="原始 D-Fire 目录（需含 train/ 与 test/，各自含 images/ 与 labels/）")
+    parser.add_argument("--dst", type=Path, default=ROOT / "data/raw/D-Fire",
+                        help="输出目录，默认 <repo>/data/raw/D-Fire")
+    return parser.parse_args()
+
+
 def main() -> None:
+    global SRC, DST
+    args = parse_args()
+    SRC = args.src.expanduser().resolve()
+    DST = args.dst.expanduser().resolve()
+    if not SRC.is_dir():
+        raise SystemExit(f"[ERROR] --src 不存在: {SRC}")
+
     for d in ("train", "val", "test"):
         (DST / "images" / d).mkdir(parents=True, exist_ok=True)
         (DST / "labels" / d).mkdir(parents=True, exist_ok=True)

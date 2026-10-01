@@ -44,7 +44,7 @@ python -m firesmoke prepare --dataset fasdd
 
 规范化后均为 `0=fire, 1=smoke`。严禁把原 D-Fire 权重的输出编号直接解释为该顺序。
 原始空标签保留。当前配置排除包含零面积/非法归一化框的**整张图像**，排除清单保存在
-`artifacts/data/<dataset>/excluded.json`。原因、原标注和原 split 均可追溯。
+`data/prepared/<dataset>/excluded.json`。原因、原标注和原 split 均可追溯。
 几何上略跨图像边缘、但 xywh 各分量合法的框保留并报告，不静默裁剪标签。
 
 输出目录必须不存在，防止覆盖已经用于实验的数据。重新准备时在配置中使用新版本目录。

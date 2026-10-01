@@ -114,6 +114,31 @@ def prepare(cfg, dataset):
         label.write_text("".join(" ".join(map(str, b)) + "\n" for b in r["boxes"]), encoding="utf-8")
         r["prepared_image"] = str(image)  # do not resolve: preserve canonical label lookup
         r["prepared_label"] = str(label)
+    # Hard-negative 过采样: 把"train 划分内的纯背景图"(无 GT 框)的行重复 neg_repeat 次。
+    #
+    # 只在 train 生效, 绝不重复 val/test: 评估指标按行求均值, 重复行会让背景图被多次计入,
+    # 从而偏置 background_alarm_fraction 这类按图像计的指标。
+    #
+    # 可行性依据:
+    #   * ultralytics 的 get_img_files() 只排序、不去重图像列表 -> 重复行就是真实的过采样
+    #   * load_prepared 的四重校验在重复行下依然成立: 重复行指向同一份
+    #     prepared_image / prepared_label, sha256 与 split 行逐一比对都能通过
+    #   * neg_repeat=1 时本段为 no-op, 不改动任何既有行为
+    spec = cfg["datasets"][dataset]
+    neg_repeat = int(spec.get("neg_repeat", 1))
+    if neg_repeat < 1:
+        raise ValueError("neg_repeat must be >= 1")
+    if neg_repeat > 1:
+        before = len(records)
+        expanded = []
+        for r in records:
+            expanded.append(r)
+            # 只重复 train 划分里的纯背景图
+            if r["split"] == "train" and not r["boxes"]:
+                expanded.extend([r] * (neg_repeat - 1))
+        records = expanded
+        n_tr = sum(1 for r in records if r["split"] == "train")
+        print(f"[prepare] neg_repeat={neg_repeat}: 总行 {before} -> {len(records)}（train 行 {n_tr}）")
     for split in SPLITS:
         (out / f"{split}.txt").write_text("".join(r["prepared_image"]+"\n" for r in records if r["split"] == split))
     manifest = out / "manifest.jsonl"
@@ -128,6 +153,8 @@ def prepare(cfg, dataset):
         "excluded_counts": dict(Counter(r["split"] for r in excluded)),
         "excluded_sha256": digest(out / "excluded.json"),
         "label_policy": cfg["datasets"][dataset].get("invalid_box_policy", "error"),
+        # 过采样设置必须随数据一起登记: 它改变了训练分布, 影响可复现性
+        "neg_repeat": neg_repeat,
         "image_content_hashed": False,
     })
     return out
