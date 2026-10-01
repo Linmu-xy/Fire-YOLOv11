@@ -22,6 +22,18 @@ datasets:
     source_names: [smoke, fire]
     invalid_box_policy: exclude_invalid_images
     neg_repeat: 3
+  # FireSmoke-YOLO: 另一套 fire/smoke 数据（9,452 图 / 7,253 有标签 / 2,199 负样本占 23.3%）。
+  # 来源 HuggingFace YingjieCheng/FireSmokeDetDatasets，无官方 README/类别声明。
+  # 类别顺序 0=fire, 1=smoke —— 与仓库 NAMES 一致（已画框人工验证 4 张含两类样本），无需换序。
+  # 注意: 原数据集的负样本(NoFileSmoke*)原本没有标签文件，已用
+  #       analysis/scripts/prepare_yolo_source.py 补为 2,199 个空标签文件（纯新增，未改既有文件）。
+  # 该数据集目前只存在于 lxy 机器（data/raw/FireSmoke-YOLO）；本机未放置，
+  # 但只要不对 fsyolo 跑 prepare/训练就不受影响。
+  fsyolo:
+    root: data/raw/FireSmoke-YOLO
+    layout: dfire
+    source_names: [fire, smoke]
+    invalid_box_policy: exclude_invalid_images
 prepared_root: data/prepared
 results_root: outputs
 weights: weights/yolo11n.pt
