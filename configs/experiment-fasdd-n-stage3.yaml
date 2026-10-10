@@ -32,7 +32,7 @@ experiments:
   T1:
     method: reg_transfer
     priority: parallel_control
-    status: running_cmj_seed0
+    status: completed_cmj_seed0
     initialization: regression_head
     comparison: Historical seed0 control, with identical head RNG and trunk initialization.
     change: Copy compatible cv2 regression and DFL state in addition to layers 0..22.
