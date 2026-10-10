@@ -1,0 +1,319 @@
+{
+  "protocol": "firesmoke-v1",
+  "dataset": "fasdd_cv_clean_v1",
+  "method": "baseline",
+  "seed": 0,
+  "tag": "fasdd-cv-clean-v1",
+  "research": {
+    "architecture": "baseline",
+    "background_alpha": 0.0,
+    "style": false,
+    "topk": 32
+  },
+  "training": {
+    "epochs": 100,
+    "imgsz": 640,
+    "batch": 32,
+    "device": "0",
+    "workers": 8,
+    "optimizer": "SGD",
+    "lr0": 0.01,
+    "lrf": 0.01,
+    "momentum": 0.937,
+    "weight_decay": 0.0005,
+    "warmup_epochs": 3.0,
+    "patience": 100,
+    "deterministic": true,
+    "amp": false,
+    "close_mosaic": 10,
+    "mosaic": 1.0,
+    "mixup": 0.0,
+    "hsv_h": 0.015,
+    "hsv_s": 0.7,
+    "hsv_v": 0.4,
+    "scale": 0.5,
+    "translate": 0.1,
+    "fliplr": 0.5,
+    "cache": false,
+    "plots": true,
+    "save": true,
+    "val": true,
+    "seed": 0
+  },
+  "data": "/home/lxy/Documents/yolo11/Fire-YOLOv11/data/prepared/fasdd_cv_clean_v1/data.yaml",
+  "weights": "/home/lxy/Documents/yolo11/Fire-YOLOv11/weights/yolo11n.pt",
+  "output": "/home/lxy/Documents/yolo11/Fire-YOLOv11/results/fasdd_cv_clean_v1/fasdd-cv-clean-v1/baseline/seed0",
+  "training_started": true,
+  "initialization": "shared YOLO11 layers 0..22; all detection heads initialized from scratch",
+  "selection": "best validation mAP50-95; never select on test",
+  "provenance": {
+    "git_commit": "21daf8c7943c872d8dbdd36b3dd283f3ca98301f",
+    "git_status": "M README.md\n M analysis/scripts/zeroshot_eval.py\n M configs/protocol.yaml\n M docs/NEXT_TRAINING.md\n?? configs/protocol-fasdd-cv-clean-v1.yaml\n?? docs/FASDD_CV_CLEAN_V1.md\n?? docs/FASDD_CV_CLEAN_V1_BASELINE_SEED0.md\n?? docs/FASDD_CV_CLEAN_V1_NOTES_ZH.md\n?? docs/PLAN_ARMB.md\n?? results/fasdd_cv_clean_v1/\n?? scripts/prepare_armb_dataset.py\n?? scripts/prepare_fasdd_clean_v1.py\n?? scripts/train_fasdd_cv_clean_v1_baseline_seed0.py\n?? tests/test_fasdd_clean_v1.py",
+    "python": "3.10.20 (main, Mar 11 2026, 17:46:40) [GCC 14.3.0]",
+    "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.35",
+    "versions": {
+      "ultralytics": "8.4.42",
+      "torch": "2.11.0",
+      "torchvision": "0.26.0",
+      "numpy": "2.2.6",
+      "Pillow": "12.2.0",
+      "PyYAML": "6.0.3"
+    },
+    "argv": [
+      "/home/lxy/Documents/yolo11/Fire-YOLOv11/firesmoke/__main__.py",
+      "--config",
+      "/home/lxy/Documents/yolo11/Fire-YOLOv11-runtime/fasdd_cv_clean_v1/fasdd-cv-clean-v1/baseline/seed0/20261008T034343_274638Z/registered_protocol.yaml",
+      "train",
+      "--dataset",
+      "fasdd_cv_clean_v1",
+      "--method",
+      "baseline",
+      "--seed",
+      "0",
+      "--tag",
+      "fasdd-cv-clean-v1",
+      "--execute"
+    ],
+    "source_sha256": {
+      "configs/models/yolo11n-p2-acr-local.yaml": "487e236a41ef2869ea6d852e3d9ae52459f1bc8206e378fd4a5f8d395de1d5a2",
+      "configs/models/yolo11n-p2-acr-no-align.yaml": "f414076fe232b3aa399e5265a4d9af6be7af29ce8d29c91bb9c6abf0b507328b",
+      "configs/models/yolo11n-p2-acr-uniform.yaml": "3d399fd612554f4e6bb1765dc8079725ca6242cf0b33f3e1f36b4082cf71696a",
+      "configs/models/yolo11n-p2-acr.yaml": "2999a5b1a9f3d62fd827e3e12da7c1bd53646665ff44f47b5230e1f3e3fa171a",
+      "configs/models/yolo11n-p2-dcbr-semantic.yaml": "90c093ce32c130541614d2b9ddcf994f54d74541e00e0782644a6620cda2cd3d",
+      "configs/models/yolo11n-p2-dcbr-whole.yaml": "3d6a758becccc33a8f4393b1ab6e414cff74abcc2d98afc16ff381606a50b5e3",
+      "configs/models/yolo11n-p2-dcbr.yaml": "2d2a3106325e325edc2a778314f1cf5e3ab57e884da7abd511f3061b70b97b60",
+      "configs/models/yolo11n-p2-srdg.yaml": "668527ee4fe7bed90a51b035ae2273caeb8b60c1788b920b5928e9acb14d6267",
+      "configs/models/yolo11n-p2.yaml": "08580ccf6306f9fab7b3c67dbe1cd2d8a315c09fdb6c1e633bb350bfb3f7ffc1",
+      "configs/protocol-dcbr.yaml": "8e850703727a77dd70e644e8884320c2f1ee8caed0b7392db5f999647c45cbaf",
+      "configs/protocol-fasdd-cv-clean-v1.yaml": "2aeeb813192fb5d2a93db778e77c5588ed024c3fd2ca5038b970ed11f1369f12",
+      "configs/protocol-v2.yaml": "905a6bb764fab7be4dccd0006bcce8e0472182bad91a7617578c0bedb902cd68",
+      "configs/protocol.yaml": "89e50cc81727692ae4de752295ede66c1e42dcce632d900354c7c3f9cd45587a",
+      "configs/protocol_1280.yaml": "754f098be628d781e4ec497815b623a0e8a77cac26eaa48c0b9291fffa331722",
+      "configs/protocol_800.yaml": "4cdc6d605d53a0f01b3216d8d58c07dfb5a78f64ea2324d7c050815a77242b55",
+      "configs/protocol_960.yaml": "0158e86324b170ac1b882968cb2029c71b0bb64987eb47378c9f881dd69adf88",
+      "firesmoke/__init__.py": "8fe22cf4c7640cc9a26a2c952b870deb419bafa763c3122278a8285023ba131a",
+      "firesmoke/__main__.py": "3129adff95e0f38b87ab34cddfc27082c7892bcaec267ff5d40f160fdf55b44a",
+      "firesmoke/aligned_context.py": "c2dec6bab02c6ec7cb69ac5626a9dde64f8b00cf0f442869444d9331fe611145",
+      "firesmoke/band_refinement.py": "fa45ee1cae41e63ca3bae8c7d091be8beef03878cc847d2fef17d00bdf7b3e55",
+      "firesmoke/cli.py": "7a52f66a0485c7dfbef717fe9e7344c0efe9ffb60bfae72a3665bfeb78dbe9fc",
+      "firesmoke/common.py": "0a392ad7a194d58d46f9b6948e4c1760ac81ebb3a1337b5ad481e7dffd5b259e",
+      "firesmoke/data.py": "6c39fe7d301da61eb984e3a16bdc8bc391192960556a8873cee41e93e8c35cc8",
+      "firesmoke/evaluation.py": "bd0662e6894969bf8091f4075ca2bb264dc5d943ea702562599acda7163efc84",
+      "firesmoke/experiment.py": "e7ab066a70960b327eed57f9e84521bb9837f1698eb90d61d02b85f527a97009",
+      "firesmoke/models.py": "0bc322caaa30aa6877db75f7e004ac55b465d8d4b2eb91a1c476cd8fc0a60b72",
+      "firesmoke/reliability.py": "33842cc734fea908a51d045a374091c61f9a1ec6414a6febea2b0f84729fa6a7"
+    }
+  },
+  "data_metadata": {
+    "dataset": "fasdd_cv_clean_v1",
+    "names": [
+      "fire",
+      "smoke"
+    ],
+    "source": {
+      "root": "data/raw/FASDD_CV_clean_v1",
+      "layout": "fasdd",
+      "source_names": [
+        "fire",
+        "smoke"
+      ],
+      "invalid_box_policy": "error"
+    },
+    "manifest_sha256": "19571df3a03523359a191e15c8157f0e30c62a0a9ccfeb3d0e04faccbc0fb91e",
+    "portable_inventory_sha256": "98c49236cc15d5960fceb93d1c9fdc26383540aa72673c4cd3687ca8daa9a67c",
+    "counts": {
+      "train": 44113,
+      "val": 29804,
+      "test": 15488
+    },
+    "excluded_counts": {},
+    "excluded_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "label_policy": "error",
+    "neg_repeat": 1,
+    "image_content_hashed": true,
+    "portable_content_sha256": "56d5ca7e69646edd5b9a3351c86bfa24b190cf37e01af1335721955e8d6a1ca2",
+    "selection_policy": {
+      "version": 1,
+      "source": "canonical fasdd (FASDD_CV; invalid-label images already excluded)",
+      "reference": "canonical dfire, all train/val/test splits",
+      "cross_dataset": "exclude FASDD members of byte/RGB-pixel equivalence components",
+      "within_fasdd": "one image per equivalence component; test > val > train, then source id",
+      "pixel_signature": "SHA256 of EXIF-transposed RGB width,height and pixel bytes",
+      "perceptual_screen": {
+        "phash_distance": 4,
+        "dhash_distance": 4,
+        "global_gray32_ssim_min": 0.95
+      },
+      "perceptual_action": "audit candidates only; no automatic exclusion or scene-id assignment",
+      "split_action": "retain official split of survivor; never move images between splits"
+    },
+    "original_source_counts": {
+      "train": 47658,
+      "val": 31769,
+      "test": 15884
+    },
+    "source_metadata": {
+      "fasdd": {
+        "dataset": "fasdd",
+        "names": [
+          "fire",
+          "smoke"
+        ],
+        "source": {
+          "root": "data/raw/FASDD_CV",
+          "layout": "fasdd",
+          "source_names": [
+            "fire",
+            "smoke"
+          ],
+          "invalid_box_policy": "exclude_invalid_images"
+        },
+        "manifest_sha256": "13e1408c11d5119ef3eb4c31f8d00a9270aab0325ea11956e79cd1784c7c5a94",
+        "portable_inventory_sha256": "af1a353ee854c3143710cc7540863af35ab23f270e332fa173a4a9d27386f7ca",
+        "counts": {
+          "train": 47658,
+          "val": 31769,
+          "test": 15884
+        },
+        "excluded_counts": {
+          "train": 2,
+          "val": 1
+        },
+        "excluded_sha256": "6254eabd41bb5f5c1915037ce5f28b88b02381f5a0f0128cb10d8c53aa90e4a7",
+        "label_policy": "exclude_invalid_images",
+        "neg_repeat": 1,
+        "image_content_hashed": false
+      },
+      "dfire": {
+        "dataset": "dfire",
+        "names": [
+          "fire",
+          "smoke"
+        ],
+        "source": {
+          "root": "data/raw/D-Fire",
+          "layout": "dfire",
+          "source_names": [
+            "smoke",
+            "fire"
+          ],
+          "invalid_box_policy": "exclude_invalid_images"
+        },
+        "manifest_sha256": "e9fb16a53db5c80e8aa653eb39401c5e01d804bac970dd79dd8ecfba202a5c68",
+        "portable_inventory_sha256": "033e970451ffc052cf13f66113bb65dfc48e82c3984f89a0a73e0a34f8bbaf29",
+        "counts": {
+          "train": 15485,
+          "val": 1722,
+          "test": 4294
+        },
+        "excluded_counts": {
+          "train": 14,
+          "test": 12
+        },
+        "excluded_sha256": "c860979dfe952d72f5d737baf7b4c3501ae5d6f6991532fb3d9a0ab403697735",
+        "label_policy": "exclude_invalid_images",
+        "neg_repeat": 1,
+        "image_content_hashed": false
+      }
+    },
+    "excluded_source_counts": {
+      "test": 396,
+      "train": 3547,
+      "val": 1966
+    },
+    "exclusion_reasons": {
+      "cross_dataset_byte_duplicate": 5733,
+      "within_split_byte_duplicate": 90,
+      "invalid_source_label": 3,
+      "cross_split_decoded_duplicate": 11,
+      "cross_dataset_decoded_duplicate": 6,
+      "within_split_decoded_duplicate": 6,
+      "cross_split_byte_duplicate": 60
+    },
+    "perceptual_audit": {
+      "registered_screen": {
+        "phash_distance": 4,
+        "dhash_distance": 4,
+        "global_gray32_ssim_min": 0.95
+      },
+      "hash_candidates": 176561,
+      "review_candidate_pairs": 168098,
+      "low_texture_pairs": 2,
+      "pairs_by_scope": {
+        "dfire/train <-> fasdd/test": 110,
+        "dfire/test <-> fasdd/test": 40,
+        "dfire/val <-> fasdd/test": 5,
+        "dfire/train <-> fasdd/train": 767,
+        "dfire/test <-> fasdd/train": 219,
+        "fasdd/test <-> fasdd/train": 15588,
+        "dfire/val <-> fasdd/train": 79,
+        "fasdd/test <-> fasdd/val": 39386,
+        "fasdd/train <-> fasdd/val": 111089,
+        "dfire/train <-> fasdd/val": 606,
+        "dfire/test <-> fasdd/val": 152,
+        "dfire/val <-> fasdd/val": 57
+      },
+      "impacted_images_by_scope": {
+        "fasdd/test": 4928,
+        "dfire/train": 781,
+        "dfire/test": 198,
+        "dfire/val": 97,
+        "fasdd/train": 11434,
+        "fasdd/val": 10319
+      },
+      "review_status": "pending",
+      "scope": "FASDD across splits and FASDD vs D-Fire; same-split perceptual redundancy not screened",
+      "action": "No perceptual candidate is automatically excluded; no scene identity is inferred"
+    },
+    "audit_sha256": {
+      "exclusions.jsonl": "7dcc0903ec2f6e18c9b604fb00124b2a28bf583aa1236eb01a10c383df830246",
+      "perceptual_candidates.csv": "e43e9a3090bef8c6333d080281cd8ac7ec15f52b64171ce77013eb09d24c5e2d",
+      "decode_failures.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "build_input.json": "8db280bcaa2a54868e37ddfa2a86385835824ffe19d506d7b4855c5470658885",
+      "content_hashes.jsonl": "e826b03ad3650cc5d32fd83df40a7193d32e9ba1a64bf23a013609ef3b441145",
+      "retained_source_ids.jsonl": "5c280c7154f4fb771bbda1de6b1fbe828c2dc09b76125f44776ccd1bee039c81",
+      "perceptual_audit.json": "9d2ff849ea1b632ee8c04647187c11dd257d64a9ed6754204657f1cbddeb4f94"
+    }
+  },
+  "pretrained_sha256": "0ebbc80d4a7680d14987a577cd21342b65ecfd94632bd9a8da63ae6417644ee1",
+  "resolved_overrides": {
+    "epochs": 100,
+    "imgsz": 640,
+    "batch": 32,
+    "device": "0",
+    "workers": 8,
+    "optimizer": "SGD",
+    "lr0": 0.01,
+    "lrf": 0.01,
+    "momentum": 0.937,
+    "weight_decay": 0.0005,
+    "warmup_epochs": 3.0,
+    "patience": 100,
+    "deterministic": true,
+    "amp": false,
+    "close_mosaic": 10,
+    "mosaic": 1.0,
+    "mixup": 0.0,
+    "hsv_h": 0.015,
+    "hsv_s": 0.7,
+    "hsv_v": 0.4,
+    "scale": 0.5,
+    "translate": 0.1,
+    "fliplr": 0.5,
+    "cache": false,
+    "plots": true,
+    "save": true,
+    "val": true,
+    "seed": 0,
+    "model": "/home/lxy/miniconda3/envs/yolo11/lib/python3.10/site-packages/ultralytics/cfg/models/11/yolo11n.yaml",
+    "data": "/home/lxy/Documents/yolo11/Fire-YOLOv11/data/prepared/fasdd_cv_clean_v1/data.yaml",
+    "pretrained": "/home/lxy/Documents/yolo11/Fire-YOLOv11/weights/yolo11n.pt",
+    "project": "/home/lxy/Documents/yolo11/Fire-YOLOv11/results/fasdd_cv_clean_v1/fasdd-cv-clean-v1/baseline",
+    "name": "seed0",
+    "exist_ok": false,
+    "resume": false,
+    "task": "detect",
+    "mode": "train",
+    "split": "val"
+  }
+}

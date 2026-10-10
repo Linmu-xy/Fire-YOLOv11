@@ -1,0 +1,12 @@
+{
+  "seeds": {
+    "lxy": 0,
+    "cmj": 1
+  },
+  "training_parameters_match": true,
+  "method_settings_match": true,
+  "pretrained_weight_match": true,
+  "data_content_match": true,
+  "core_source_and_registered_config_match": true,
+  "package_versions_match": true
+}

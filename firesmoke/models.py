@@ -15,6 +15,9 @@ from ultralytics.utils.loss import v8DetectionLoss
 from .common import NAMES, ROOT, write_json
 from .band_refinement import DetailConditionedBandResidual
 from .aligned_context import AlignedContextResidual
+from .pyramid_refinement import install_refinement
+from .detail_refinement_v2 import install_normalized_detail
+from .checkpoint_state import restore_full_model_state
 
 
 def architecture(name):
@@ -151,15 +154,33 @@ class ResearchTrainer(DetectionTrainer):
         self.research_images = 0
         self.research_empty = 0
         self.add_callback("on_train_epoch_end", _log_background_exposure)
+        if self.research.get("monitor_refinement"):
+            from .refinement_monitor import attach_refinement_monitor, start_epoch, start_batch, end_batch
+            self.add_callback("on_train_start", attach_refinement_monitor)
+            self.add_callback("on_train_epoch_start", start_epoch)
+            self.add_callback("on_train_batch_start", start_batch)
+            self.add_callback("on_train_batch_end", end_batch)
 
     def get_model(self, cfg=None, weights=None, verbose=True):
         model = ResearchModel(cfg, nc=2, ch=3, verbose=verbose)
         model.names = dict(enumerate(NAMES))
         model.research_alpha = self.research["background_alpha"]
         model.research_topk = self.research["topk"]
-        if weights is not None:
+        resuming = bool(getattr(self, "resume", False))
+        if weights is not None and not resuming:
             report = shared_transfer(model, weights)
             write_json(self.save_dir / "weight_transfer.json", report)
+        if self.research.get("refinement"):
+            mode = self.research["refinement"]
+            hidden = self.research.get("refinement_hidden", 16)
+            report = (install_normalized_detail(model, hidden) if mode == "detail_norm"
+                      else install_refinement(model, mode, hidden))
+            if not resuming:
+                write_json(self.save_dir / "refinement.json", report)
+        if resuming:
+            if weights is None:
+                raise RuntimeError("Checkpoint resume requires complete model weights")
+            self.model_restore_report = restore_full_model_state(model, weights)
         return model
 
     def preprocess_batch(self, batch):

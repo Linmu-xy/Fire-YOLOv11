@@ -18,6 +18,8 @@
 - [DCBR 文献检索](docs/RESEARCH_DCBR.md)：七项相关工作、最接近方法与新颖性边界。
 - [ACR 新模块方案](docs/PLAN_ACR.md)：语义局部对齐与多尺度上下文残差，含实验矩阵和论文路线。
 - [ACR 技术验证](docs/ACR_VALIDATION.md)：模块不变量、训练路径、参数量和当前验证边界。
+- [**Arm B 下一轮训练方案**](docs/PLAN_ARMB.md)：跨域误报的数据侧干预（D-Fire + 外来负样本 ×3），
+  含预登记终点、门槛、停止规则与执行命令。
 
 下一轮 DCBR（100 epochs / SGD / batch32 / seed0，默认只预检）：
 

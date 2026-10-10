@@ -1,0 +1,43 @@
+version: 1
+tag: fasdd-n-stage3
+method: frozen_quality_probe
+dataset: fasdd_cv_clean_v1
+data_protocol: configs/protocol-fasdd-cv-clean-v1.yaml
+parent: results/fasdd_cv_clean_v1/fasdd-cv-clean-v1/baseline/seed0/weights/best.pt
+portable_content_sha256: 56d5ca7e69646edd5b9a3351c86bfa24b190cf37e01af1335721955e8d6a1ca2
+seed: 0
+training:
+  epochs: 5
+  imgsz: 640
+  batch: 32
+  workers: 8
+  optimizer: AdamW
+  lr: 0.001
+  weight_decay: 0.0001
+  topk: 128
+  augment: false
+  rect: false
+  half: false
+  frozen_parent_eval: true
+  split_rule: SHA256('quality-seed0:' + manifest_id) modulo10; fold0 heldout
+  checkpoint_selection: Minimum image-normalized BCE on train-internal heldout
+  official_val_during_fit: false
+evaluation:
+  split: val
+  imgsz: 640
+  batch: 64
+  workers: 8
+  rect: true
+  device: '0'
+  conf: 0.001
+  iou: 0.7
+  max_det: 300
+  half: false
+  augment: false
+  plots: false
+  verbose: false
+score_exponent: 1.0
+evaluation_order: [disabled, post_nms, pre_nms]
+disabled_reference_mAP50_95: 0.532632956
+disabled_reference_tolerance: 0.00001
+minimum_gain_pp_to_expand: 0.5

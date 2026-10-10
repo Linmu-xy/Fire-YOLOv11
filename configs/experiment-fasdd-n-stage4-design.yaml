@@ -1,0 +1,79 @@
+# Research design only. No module implementation or new training is claimed.
+version: 4
+registered_on: '2026-10-10'
+status: design_not_implemented_not_started
+tag: fasdd-n-stage4
+results_root: results
+dataset: fasdd_cv_clean_v1
+portable_content_sha256: 56d5ca7e69646edd5b9a3351c86bfa24b190cf37e01af1335721955e8d6a1ca2
+deployment_model: YOLO11n
+maximum_deployment_parameters: 3000000
+primary_metric: val_mAP50_95
+primary_evaluation: {imgsz: 640, rect: true, batch: 64, conf: 0.001, iou: 0.7, max_det: 300, half: false, augment: false, split: val}
+tests_used_for_selection: false
+experiments:
+  B0:
+    priority: first_module_pilot
+    suggested_host: lxy
+    name: box_boundary_refinement
+    parent: results/fasdd_cv_clean_v1/fasdd-cv-clean-v1/baseline/seed0/weights/best.pt
+    parent_sha256: d29e5872ab7d9b4a7f33fe5bb29cd06ca883c7c01d36f655e0dbdbf77743a0e2
+    parent_policy: Frozen parent, classifier and BN; unchanged class logits.
+    inputs: Existing64-channel regression tower and detached coarse decoded box per anchor.
+    sampling: Four predicted edge midpoints and predicted box center on each original P3/P4/P5 regression feature map.
+    adapter: Shared64to16 projection; five samples plus original64-channel feature and3-dimensional level code;147to32 pointwise; depthwise3x3;32to4 edge correction.
+    initialization: Zero final projection; disabled and initial enabled boxes/logits must reproduce parent.
+    estimated_adapter_parameters: 6228
+    estimated_total_parameters: 2596458
+    estimate_note: Conv layers include biases and use SiLU without BN; actual implementation must recount.
+    residual: Add0.1*tanh(edge correction) times detached coarse width/height to four coarse xyxy edges; minimum resulting width/height remains at least0.8 of coarse size.
+    assignment: Original frozen parent TAL positives with coarse IoU>=0.3; labels and classification scores unchanged.
+    objective: Refined-box CIoU plus0.25*SmoothL1 on width/height-normalized edge offsets, normalized per GT and image; no quality score multiplier.
+    input_gradient: Stop gradient through coarse sampling coordinates in first pilot.
+    epochs: 5
+    imgsz: 640
+    batch: 32
+    optimizer: AdamW
+    lr: 0.001
+    weight_decay: 0.0001
+    augmentation: None in first frozen-parent pilot.
+    sample_partition: Reuse Q0 train-only39,790 fit/4,323 heldout IDs; no official val for epoch selection.
+    checkpoint_selection: Train-internal heldout AP50_95, not training or heldout loss.
+    primary_comparison: Original frozen parent; original-p scoring and unchanged NMS settings.
+    attribution_controls: [no_correction, learned_four_constant_edge_offsets, same_adapter_with_five_repeated_anchor_center_samples]
+    internal_evaluation: Same rect640/conf0.001/NMS0.7/max_det300 protocol on train-internal heldout, with derived lists outside repo.
+    diagnostics: [fire_AP75, fire_AP50_95, smoke_AP50_95, fire_16to64_recall75, negative_alarm_rate, class_logits_exact, box_delta_distribution, latency]
+    budget_gate: At least0.5pp official val mAP50_95 gain plus fire_AP75 gain, without more than0.2pp smoke_AP50_95 loss.
+    gate_note: Resource allocation rule, not statistical significance.
+  B1:
+    status: conditional
+    condition: B0 passes; run paired equal-schedule student control and adapter.
+    training: Same n640 recipe,100epochs, identical initialization and augmentation; parent receives only original detection losses, adapter receives its detached-input refinement losses through a separate optimizer and clipping group.
+    ablation_order: [detached_parent_features_and_coarse_coordinates, allow_refinement_gradients_into_parent_as_separate_arm]
+    attribution_control: First joint arm must verify unchanged parent detection gradients and RNG on paired batches; refinement gradients must not alter parent clipping or optimizer groups.
+    confirmation: Paired seeds0,1,2 after a useful seed0 result.
+  T3:
+    priority: parallel_teacher_feasibility
+    suggested_host: cmj_after_T1_finishes
+    name: same_data_teacher
+    architecture: YOLO11s as training-only teacher
+    train_and_evaluate_resolution: 640
+    dataset: Same FASDD clean-v1 train/val and class order.
+    teacher_gate: At least2pp mAP50_95 and3pp fire_AP75 above matched n baseline.
+    note: No qualifying same-data teacher found in inspected result folders; D-Fire960 is not one.
+  KD0:
+    status: conditional_on_teacher_gate
+    name: selective_localization_distillation
+    deployment: Original n architecture, no teacher or new inference branch.
+    initial_pilot: Paired20epoch fine-tuning control versus KD from the same baseline checkpoint, with optimizer resets matched.
+    assignment: Student TAL positives, same stride8/16/32 anchor coordinates and reg_max16.
+    teacher_mask: Correct GT class,teacher probability_gt_class>=0.1,teacher IoU>=0.6,teacher IoU at least0.05 above current detached student IoU.
+    loss: Original detection losses plus0.5*T^2*KL(teacher distribution || student distribution),temperature2,normalized over selected anchors and four edges.
+    teacher_policy: Frozen eval model and BN, no teacher gradients.
+    first_arm: Regression distribution only; classification distillation separately later.
+    control_note: Fine-tuned control is required; do not attribute all gain over the historical100epoch checkpoint to KD.
+  D1:
+    status: manual_review_required_before_any_label_changes
+    source: Existing300-image training-only review manifest.
+    priority: Verify火簇合并拆分、发光区域、烟羽边界及漏标，保存reviewer和每条修改依据。
+    version_policy: New train-only version with original/revised mapping; fixed val labels and an independent data ablation.

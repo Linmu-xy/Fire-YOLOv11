@@ -1,0 +1,93 @@
+protocol: firesmoke-v1
+datasets:
+  dfire:
+    root: data/raw/D-Fire
+    layout: dfire
+    source_names:
+    - smoke
+    - fire
+    invalid_box_policy: exclude_invalid_images
+  fasdd_cv_clean_v1:
+    root: data/raw/FASDD_CV_clean_v1
+    layout: fasdd
+    source_names:
+    - fire
+    - smoke
+    invalid_box_policy: error
+prepared_root: data/prepared
+results_root: results
+weights: weights/yolo11n.pt
+seeds:
+- 0
+- 1
+- 2
+methods:
+  baseline:
+    architecture: baseline
+    background_alpha: 0.0
+    style: false
+  context:
+    architecture: baseline
+    background_alpha: 0.0
+    style: false
+    refinement: context
+    refinement_hidden: 16
+    monitor_refinement: true
+  detail_norm:
+    architecture: baseline
+    background_alpha: 0.0
+    style: false
+    refinement: detail_norm
+    refinement_hidden: 16
+    monitor_refinement: true
+background_topk: 32
+training:
+  epochs: 100
+  imgsz: 640
+  batch: 32
+  device: '0'
+  workers: 8
+  optimizer: SGD
+  lr0: 0.01
+  lrf: 0.01
+  momentum: 0.937
+  weight_decay: 0.0005
+  warmup_epochs: 3.0
+  patience: 100
+  deterministic: true
+  amp: false
+  close_mosaic: 10
+  mosaic: 1.0
+  mixup: 0.0
+  hsv_h: 0.015
+  hsv_s: 0.7
+  hsv_v: 0.4
+  scale: 0.5
+  translate: 0.1
+  fliplr: 0.5
+  cache: false
+  plots: true
+  save: true
+  val: true
+dataset_version:
+  name: fasdd_cv_clean_v1
+  portable_content_sha256: 56d5ca7e69646edd5b9a3351c86bfa24b190cf37e01af1335721955e8d6a1ca2
+  policy:
+    version: 1
+    source: canonical fasdd (FASDD_CV; invalid-label images already excluded)
+    reference: canonical dfire, all train/val/test splits
+    cross_dataset: exclude FASDD members of byte/RGB-pixel equivalence components
+    within_fasdd: one image per equivalence component; test > val > train, then source
+      id
+    pixel_signature: SHA256 of EXIF-transposed RGB width,height and pixel bytes
+    perceptual_screen:
+      phash_distance: 4
+      dhash_distance: 4
+      global_gray32_ssim_min: 0.95
+    perceptual_action: audit candidates only; no automatic exclusion or scene-id assignment
+    split_action: retain official split of survivor; never move images between splits
+  perceptual_review: pending
+  scene_independence: unverified
+  test_history: Original FASDD and D-Fire tests were previously inspected; not a fresh
+    confirmatory holdout
+base_data_protocol: configs/protocol-fasdd-cv-clean-v1.yaml

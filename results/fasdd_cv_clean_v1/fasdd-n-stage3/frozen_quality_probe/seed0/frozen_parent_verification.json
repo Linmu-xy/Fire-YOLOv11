@@ -1,0 +1,7 @@
+{
+  "status": "passed",
+  "parent_file_sha256": "d29e5872ab7d9b4a7f33fe5bb29cd06ca883c7c01d36f655e0dbdbf77743a0e2",
+  "parent_state_sha256": "bffe1dcc6dc5bfefec2333119d12ed3bbfd08f08d88c8cb387fbd13203e625de",
+  "trainable_parameters": 1802,
+  "epochs": 5
+}

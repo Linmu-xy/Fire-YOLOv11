@@ -1,0 +1,14 @@
+{
+  "status": "completed",
+  "started_at": "2026-10-09T04:16:38.680934+00:00",
+  "runtime": "/home/lxy/Documents/yolo11/Fire-YOLOv11-runtime/fasdd_cv_clean_v1/fasdd-n-refinement-v1/detail/seed0/resume-20261009T041638_590362Z",
+  "method": "detail",
+  "seed": 0,
+  "resume_from": "/home/lxy/Documents/yolo11/Fire-YOLOv11/results/fasdd_cv_clean_v1/fasdd-n-refinement-v1/detail/seed0/weights/last.pt",
+  "start_epoch": 25,
+  "trainer_pid": 5655,
+  "preflight_at": "2026-10-09T04:16:42.685717+00:00",
+  "returncode": 0,
+  "ended_at": "2026-10-09T09:15:24.781959+00:00",
+  "last_completed_epoch": 100
+}

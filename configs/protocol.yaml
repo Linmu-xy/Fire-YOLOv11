@@ -22,6 +22,18 @@ datasets:
     source_names: [smoke, fire]
     invalid_box_policy: exclude_invalid_images
     neg_repeat: 3
+  # Arm B (G2 跨域误报数据干预): D-Fire 全量 + FireSmoke-YOLO train 负样本 ×3。
+  # 与 dfire_hn3 的关键区别: 这里**不使用** neg_repeat —— 该参数会重复 train 内所有无框图,
+  # 把 D-Fire 自身的背景图(源域 val 触发 0/790, 无信息增量)也一起重复, 引入混淆变量。
+  # 剂量改为在源目录层面对 FS 负样本物理重复 3 份(scripts/prepare_armb_dataset.py),
+  # D-Fire 背景保持每张一次, 因此唯一变量是「FS 负样本的曝光量」。
+  # val / test 与 dfire 逐图一致 -> 域内指标可直接与 results/dfire/paper-v1 对照比较。
+  # 源目录由脚本生成、不入 Git; 换机器时重新跑脚本 + prepare 即可(PROJECT_LAYOUT 坑 1)。
+  dfire_fsneg3:
+    root: data/raw/D-Fire-FSneg
+    layout: dfire
+    source_names: [smoke, fire]
+    invalid_box_policy: exclude_invalid_images
   # FireSmoke-YOLO: 另一套 fire/smoke 数据（9,452 图 / 7,253 有标签 / 2,199 负样本占 23.3%）。
   # 来源 HuggingFace YingjieCheng/FireSmokeDetDatasets，无官方 README/类别声明。
   # 类别顺序 0=fire, 1=smoke —— 与仓库 NAMES 一致（已画框人工验证 4 张含两类样本），无需换序。

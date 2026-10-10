@@ -1,0 +1,90 @@
+# Experiment registration, not an executable training protocol for every row.
+version: 3
+registered_on: '2026-10-10'
+tag: fasdd-n-stage3
+deployment_model: YOLO11n
+maximum_deployment_parameters: 3000000
+primary_metric: val_mAP50_95
+fixed_dataset: fasdd_cv_clean_v1
+portable_content_sha256: 56d5ca7e69646edd5b9a3351c86bfa24b190cf37e01af1335721955e8d6a1ca2
+evaluation:
+  imgsz: 640
+  rect: true
+  batch: 64
+  conf: 0.001
+  iou: 0.7
+  max_det: 300
+  half: false
+  augment: false
+  split: val
+initial_screen_seed: 0
+paired_confirmation_seeds: [0, 1, 2]
+screening_rule:
+  minimum_gain_pp_to_expand: 0.5
+  note: Budget gate, not a statistical significance threshold.
+  report: [fire_AP75, fire_AP50_95, smoke_AP50_95, fire_16to64_recall75, mixed_smoke_recall50, negative_image_alarm_rate]
+experiments:
+  T0:
+    method: baseline_control
+    status: executable_not_started
+    initialization: shared_layers_0_to_22_only
+    schedule: Optional control if framework changes need a fresh comparison.
+  T1:
+    method: reg_transfer
+    priority: parallel_control
+    status: running_cmj_seed0
+    initialization: regression_head
+    comparison: Historical seed0 control, with identical head RNG and trunk initialization.
+    change: Copy compatible cv2 regression and DFL state in addition to layers 0..22.
+    training: Same n640 batch32 SGD 100-epoch recipe.
+    suggested_host: cmj
+  T2:
+    method: compatible
+    status: executable_reserved_not_started
+    schedule: Follow-up initialization ablation after a useful T1 result or before changing the parent policy.
+    initialization: all_shape_compatible
+    comparison: T1 for the additional compatible classification state; historical control for total transfer gain.
+    change: Copy all same-name same-shape state within the same standard YOLO11n head.
+    training: Same n640 batch32 SGD 100-epoch recipe.
+    suggested_host: lxy
+  Q0:
+    method: frozen_quality_probe
+    priority: first_module_experiment
+    suggested_host: lxy
+    status: completed_failed_screening_seed0
+    parent: Historical baseline seed0, frozen eval-mode model and BN.
+    readout_parameters: 1802
+    input: DFL top4 probabilities, normalized mean and entropy per side; 64-channel regression-tower feature reduced to8; detached class probabilities; level one-hot.
+    output: Two classwise quality logits per original anchor.
+    target: Detached max same-class GT IoU of decoded original boxes, separately for fire and smoke.
+    sampling: Per image union of original TAL positives and top128 anchors by max class probability; deduplicate, no uniform-background majority.
+    objective: BCE soft-IoU targets, image-normalized sample weights.
+    sample_split: Train-only deterministic hash 90/10; no val or test examples for fitting.
+    pilot_training: 5 epochs, AdamW lr0.001, decay0.0001, batch32, no geometric or color augmentation, frozen parent.
+    checkpoint_selection: Train-internal held-out BCE; official val once for the selected readout.
+    primary_score: original_probability * sigmoid(quality)
+    validation_modes: [quality_disabled, quality_enabled_post_nms, quality_enabled_pre_nms]
+    go_condition: At least +0.5pp official val AP without changing parent weights; high-IoU gain should be visible.
+  Q1:
+    method: joint_quality
+    status: conditional_design_not_implemented
+    condition: Q0 passes; freeze the parent initialization choice after T1/T2.
+    comparison: The same selected initialization without quality, same n640 100 epochs.
+    gradient: Stop gradients into parent for quality inputs and IoU target in first joint arm.
+    loss: Original detection loss plus quality BCE gain0.25; regression/assignment use unmodified scores.
+    inference: Use classwise quality score before unchanged NMS; no extra detection scale.
+    diagnostics: Quality-IoU error per class/size, correlation and joint-gradient clipping effects.
+  KD:
+    method: localization_distillation
+    status: conditional_research_design
+    condition: A same-dataset stronger teacher exceeds n fire AP75 by at least3pp and mAP50_95 by at least2pp.
+    deployment: Student stays YOLO11n; teacher runs only during training.
+    first_ablation: Regression-distribution KL at corresponding strides8/16/32, temperature2, GT-consistent positive positions.
+    second_ablation: Add selective classification distillation separately.
+    prohibition: Do not use an untrained COCO teacher as a verified FASDD teacher.
+  D0:
+    method: train_label_audit
+    status: planned_manual_review
+    sample: 100 fire images with16to64px instances,100 mixed scenes,100 negatives; train only, unique image IDs, deterministic sampling.
+    changes: No labels are edited before review and a registered category/box policy.
+    comparison: A new training-only data version against the same frozen model recipe; keep val labels fixed.

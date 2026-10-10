@@ -32,15 +32,25 @@ from firesmoke.reliability import alarm_metrics, arrays, select_threshold  # noq
 T_CRIT = {1: 12.706, 2: 4.303, 3: 3.182, 4: 2.776, 5: 2.571}
 
 # (配置名, 权重路径, seed)
+# 2026-10-02 更新：旧的 outputs/ 与 experiments/ 已并入 results/（见 PROJECT_LAYOUT 第 3 节），
+# 原路径全部失效、脚本会静默 skip 到空结果。这里改为 results/ 下的真实路径，并补上
+# baseline640 的 seed1/2（此前只有 seed0，导致对照组没有跨域种子 σ）与 Arm B（dfire_fsneg3）。
+# 已发布的历史报告 analysis/reports/out_zeroshot__zeroshot_eval.md 由旧路径版本产出，口径未变。
 CONFIGS = [
-    ("baseline640", "outputs/paper-v1/dfire/baseline/seed0/weights/best.pt", 0),
-    ("p2", "experiments/yolo11n/D-Fire_p2_seed0/weights/best.pt", 0),
-    ("p2", "experiments/yolo11n/D-Fire_p2_seed1/weights/best.pt", 1),
-    ("p2", "experiments/yolo11n/D-Fire_p2_seed2/weights/best.pt", 2),
-    ("p2_srdg", "experiments/yolo11n/D-Fire_p2_srdg_seed0/weights/best.pt", 0),
-    ("p2_dcbr", "experiments/yolo11n/D-Fire_p2_dcbr_seed0_module-dcbr-v1/weights/best.pt", 0),
-    ("p2_dcbr", "experiments/yolo11n/D-Fire_p2_dcbr_seed2_module-dcbr-v1/weights/best.pt", 2),
-    ("p2_acr", "experiments/yolo11n/D-Fire_p2_acr_seed0_module-acr-v1/weights/best.pt", 0),
+    ("baseline640", "results/dfire/paper-v1/baseline/seed0/weights/best.pt", 0),
+    ("baseline640", "results/dfire/paper-v1/baseline/seed1/weights/best.pt", 1),
+    ("baseline640", "results/dfire/paper-v1/baseline/seed2/weights/best.pt", 2),
+    ("p2", "results/dfire/paper-v1/p2/seed0/weights/best.pt", 0),
+    ("p2", "results/dfire/paper-v1/p2/seed1/weights/best.pt", 1),
+    ("p2", "results/dfire/paper-v1/p2/seed2/weights/best.pt", 2),
+    ("p2_srdg", "results/dfire/module-srdg-v1/p2_srdg/seed0/weights/best.pt", 0),
+    ("p2_dcbr", "results/dfire/module-dcbr-v1/p2_dcbr/seed0/weights/best.pt", 0),
+    ("p2_dcbr", "results/dfire/module-dcbr-v1/p2_dcbr/seed2/weights/best.pt", 2),
+    ("p2_acr", "results/dfire/module-acr-v1/p2_acr/seed0/weights/best.pt", 0),
+    # Arm B（下一轮）：训练脚本产出后自动被读到；没训练时会被 skip，不影响历史配置
+    ("armb", "results/dfire_fsneg3/armb-v1/baseline/seed0/weights/best.pt", 0),
+    ("armb", "results/dfire_fsneg3/armb-v1/baseline/seed1/weights/best.pt", 1),
+    ("armb", "results/dfire_fsneg3/armb-v1/baseline/seed2/weights/best.pt", 2),
 ]
 
 
@@ -65,6 +75,10 @@ def main():
     ap.add_argument("--max-fpr", type=float, default=0.01)
     ap.add_argument("--out", default="analysis/out_zeroshot")
     ap.add_argument("--reuse", action="store_true")
+    ap.add_argument("--threshold-from", default="p2_s0",
+                    help="冻结阈值的来源，格式 <配置名>_s<seed>；默认沿用 out_zeroshot 报告口径")
+    ap.add_argument("--variance-groups", default="p2",
+                    help="计算目标域种子方差的配置组，逗号分隔（例如 p2,armb,baseline640）")
     a = ap.parse_args()
 
     out = Path(a.out)
@@ -100,10 +114,14 @@ def main():
             "tgt_test": str(tdir / "predictions.json"),
         }
 
-    # 冻结阈值：来自 p2/seed0 的**源域 val**
-    key0 = ("p2", 0)
+    # 冻结阈值：所有配置共用同一个工作点，且只能在**源域 val** 上选（协议要求，不做目标域调整）。
+    # 默认沿用 out_zeroshot 报告的口径（p2/seed0 的源域 val，fire=0.3143/smoke=0.6057），
+    # 这样新结果能与已发布的基线数字直接比较；换别的来源必须整表重算。
+    group0, seed0 = a.threshold_from.rsplit("_s", 1)
+    key0 = (group0, int(seed0))
     if key0 not in results:
-        key0 = next(iter(results))
+        raise SystemExit(f"阈值来源 {a.threshold_from} 不在本次结果里；可用："
+                         f"{sorted(f'{c}_s{s}' for c, s in results)}")
     sv, lv = arrays(json.loads(Path(results[key0]["src_val"]).read_text()))
     shared = [select_threshold(sv[:, c], lv[:, c], a.max_fpr)["threshold"] for c in (0, 1)]
     print(f"\n冻结阈值(来自 {key0} 的 {a.src} val): fire={shared[0]:.4f} smoke={shared[1]:.4f}")
@@ -148,17 +166,19 @@ def main():
     L.append("> 箭头左边是**源域 val**（阈值就在这里选的，属 in-sample），右边是**目标域 test**（跨域）。")
     L.append("")
 
-    # P2 的跨域种子方差
-    p2k = sorted(k for k in results if k[0] == "p2")
-    if len(p2k) >= 2:
-        L.append("## 3. P2 在目标域上的种子方差\n")
+    # 各配置组在目标域上的种子方差（这就是判断"改善是否可分辨"的门槛）
+    for group in [g for g in a.variance_groups.split(",") if g]:
+        keys = sorted(k for k in results if k[0] == group)
+        if len(keys) < 2:
+            continue
+        L.append(f"## 3. {group} 在目标域上的种子方差\n")
         L.append("| 指标 | 均值 | 种子σ | **MDD (α=.05)** |")
         L.append("|---|---:|---:|---:|")
         for name, get in (("mAP50-95", lambda r: r["metrics"].get("metrics/mAP50-95(B)")),
                           ("mAP50", lambda r: r["metrics"].get("metrics/mAP50(B)")),
                           ("fire 召回", lambda r: r["alarm"]["fire"]["recall"]),
                           ("背景告警比例", lambda r: r["alarm"]["background_alarm_fraction"])):
-            xs = [get(results[k]) for k in p2k]
+            xs = [get(results[k]) for k in keys]
             xs = [x for x in xs if x is not None]
             if len(xs) < 2:
                 continue

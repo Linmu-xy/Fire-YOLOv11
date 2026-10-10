@@ -1,0 +1,14 @@
+{
+  "status": "failed",
+  "started_at": "2026-10-09T04:00:17.591880+00:00",
+  "runtime": "/home/cmj/Documents/FireSmoke/Fire-YOLOv11-runtime/fasdd_cv_clean_v1/fasdd-n-refinement-v1/context/seed0/resume-20261009T040017_462644Z",
+  "method": "context",
+  "seed": 0,
+  "resume_from": "/home/cmj/Documents/FireSmoke/Fire-YOLOv11/results/fasdd_cv_clean_v1/fasdd-n-refinement-v1/context/seed0/weights/last.pt",
+  "start_epoch": 30,
+  "trainer_pid": 4823,
+  "preflight_at": "2026-10-09T04:00:22.089435+00:00",
+  "error": "FileExistsError(17, 'File exists')",
+  "ended_at": "2026-10-09T04:00:22.298231+00:00",
+  "returncode": 1
+}

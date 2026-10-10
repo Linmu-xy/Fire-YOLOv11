@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "status": "planning_only_not_executable",
+  "created": "2026-09-22",
+  "repository": {"url": "https://github.com/Linmu-xy/Fire-YOLOv11.git", "branch": "main", "inspected_head": "ce4a4058242c71b6144c1797904872d7d7513396", "inspected_on": "2026-09-22", "latest_acr_seed0_epochs": 100, "latest_acr_csv_peak_ap50_95": 0.47854},
+  "target": "中科院大类二区，以单位认可的分区版本为准",
+  "plan": "SCI二区长期规划_20260922.md",
+  "assumptions": {"gpu": "RTX 3090 24GB x1", "research_hours_per_week": [15, 20], "weeks_to_submission_ready": 24},
+  "frozen_fields_required_before_training": ["code_commit", "data_manifest_sha256", "label_manifest_sha256", "group_evidence_version", "weights_sha256", "initialization_policy", "reference_architecture_R", "epochs_T", "effective_batch", "augmentation", "checkpoint_selection_rule", "inference_settings", "loss_hyperparameters"],
+  "data_protocol": {"name": "G", "status": "not_created", "official_reference_preserved": true, "test_identity_preserved": true, "remove_confirmed_test_group_overlaps_from_development_pool": true, "development_pool_group_ratios": {"train": 0.8, "selection": 0.1, "calibration": 0.1}, "ratios_subject_to_group_count_audit": true, "train_seeds_do_not_resplit_data": true, "cross_dataset_group_audit_required": true},
+  "reference_architecture_R": null,
+  "engineering_prerequisites": ["场景组和清单校验", "独立selection与calibration清单和CLI支持", "尺寸分层与错误分析脚本版本化", "检测AP配对场景bootstrap", "包含前后处理的端到端延迟", "候选损失新协议与适配验证"],
+  "epochs_T": null,
+  "development": [
+    {"id": "D01", "question": "训练预算与父结构", "architectures": ["baseline", "p2"], "epochs": [100, 200], "seeds": [0], "runs": 4},
+    {"id": "D02", "question": "分辨率上界", "architectures": ["baseline", "p2"], "imgsz": 960, "compare_to": "对应结构640输入", "seeds": [0], "runs": 2, "requires_extra_control_if_batch_changes": true},
+    {"id": "D03", "question": "背景抽样比例的作用", "architecture": "R", "background_sampling_probabilities": [0.25, 0.5], "compare_to": "自然采样R", "fixed_optimizer_steps": true, "seeds": [0], "runs": 2},
+    {"id": "D04", "question": "候选损失机制筛查", "methods": ["R_hard_negative", "R_A", "R_C", "R_A_C"], "compare_to": "R", "seeds": [0], "runs": 4}
+  ],
+  "development_initial_cap": 12,
+  "additional_hyperparameter_run_cap": 6,
+  "formal_datasets": [
+    {"dataset": "dfire_G", "seeds": [0, 1, 2], "methods": [
+      {"id": "M01", "name": "baseline", "role": "structure_reference"},
+      {"id": "M02", "name": "p2", "role": "structure_reference"},
+      {"id": "M03", "name": "R_hard_negative", "role": "direct_control"},
+      {"id": "M04", "name": "R_focal", "role": "established_loss_control", "status": "adaptation_needed"},
+      {"id": "M05", "name": "R_rank_sort", "role": "closest_mechanism_control", "status": "adaptation_needed"},
+      {"id": "M06", "name": "R_A", "role": "factor_A", "status": "not_implemented"},
+      {"id": "M07", "name": "R_C", "role": "factor_C", "status": "not_implemented"},
+      {"id": "M08", "name": "R_A_C", "role": "candidate_full", "status": "not_implemented"},
+      {"id": "M09", "name": "external_detector", "initial_candidate": "YOLOv8n", "role": "external_architecture", "freeze_by_week": 2}
+    ], "runs": 27},
+    {"dataset": "fasdd_cv_G", "seeds": [0, 1, 2], "methods": [
+      {"name": "R", "role": "reference"},
+      {"name": "R_hard_negative", "role": "direct_control"},
+      {"name": "R_rank_sort", "role": "closest_mechanism_control"},
+      {"name": "R_A_C", "role": "candidate_full"}
+    ], "runs": 12}
+  ],
+  "formal_total_runs": 39,
+  "formal_reuse_requires_identical_fingerprints": true,
+  "cross_dataset_matrix": {"methods": ["R", "R_hard_negative", "R_rank_sort", "R_A_C"], "train_domains": ["dfire_G", "fasdd_cv_G"], "test_domains": ["dfire_G", "fasdd_cv_G"], "seeds": [0, 1, 2], "common_method_test_evaluations": 48, "target_data_used_for_training_or_tuning": false},
+  "evaluation": {"primary": "冻结源域阈值后的smoke召回与实际每类负图FPR联合表现", "calibration_empirical_max_fpr": 0.01, "secondary": ["AP50", "AP75", "AP50_95", "fire_AP_small", "per_class_AP", "background_FP_per_image", "joint_alarm_rate", "end_to_end_latency_p50_p95"], "bootstrap_unit": "confirmed_scene_or_event", "bootstrap_iterations": 2000, "held_out_target_threshold_tuning": false},
+  "development_goals_not_publication_guarantees": {"smoke_recall_gain_percentage_points": 3.0, "max_fpr_increase_percentage_points": 0.5, "max_ap50_95_drop_percentage_points": 0.3, "fire_ap_small_gain_aspiration_percentage_points": 2.0},
+  "gates": [
+    {"week": 4, "requires": "数据和评价冻结、可比基线、R与T明确"},
+    {"week": 8, "requires": "候选相对成熟方法有机制与收益线索，否则调整方向"},
+    {"week": 12, "requires": "三种子及完整消融支持主要结论，否则扩关键种子或收窄主张"},
+    {"week": 16, "requires": "冻结方法后的独立场景结果决定泛化主张"}
+  ],
+  "optional_extensions": {"initial_run_reserve": [6, 12], "third_source_evaluation_adds_training_runs": 0, "priorities": ["独立第三来源评估", "另一骨干的完整方法", "非YOLO检测器", "分辨率三种子", "关键方法扩至五种子", "官方参考协议补充"]},
+  "training_started_by_this_plan": false
+}

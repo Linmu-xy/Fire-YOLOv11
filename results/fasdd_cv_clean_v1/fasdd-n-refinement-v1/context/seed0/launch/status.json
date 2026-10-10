@@ -1,0 +1,14 @@
+{
+  "status": "completed",
+  "started_at": "2026-10-09T04:02:15.311896+00:00",
+  "runtime": "/home/cmj/Documents/FireSmoke/Fire-YOLOv11-runtime/fasdd_cv_clean_v1/fasdd-n-refinement-v1/context/seed0/resume-20261009T040215_237132Z",
+  "method": "context",
+  "seed": 0,
+  "resume_from": "/home/cmj/Documents/FireSmoke/Fire-YOLOv11/results/fasdd_cv_clean_v1/fasdd-n-refinement-v1/context/seed0/weights/last.pt",
+  "start_epoch": 30,
+  "trainer_pid": 5129,
+  "preflight_at": "2026-10-09T04:02:19.234391+00:00",
+  "returncode": 0,
+  "ended_at": "2026-10-09T08:47:30.197558+00:00",
+  "last_completed_epoch": 100
+}

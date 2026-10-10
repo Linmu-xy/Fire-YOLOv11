@@ -1,0 +1,23 @@
+{
+  "worker_pid": 38647,
+  "training_pid": 38698,
+  "started_at": "2026-10-08T12:35:10.880857+00:00",
+  "command": [
+    "/home/cmj/miniconda3/envs/yolo11/bin/python",
+    "-u",
+    "-m",
+    "firesmoke",
+    "--config",
+    "/home/cmj/Documents/FireSmoke/Fire-YOLOv11-runtime/fasdd_cv_clean_v1/fasdd-n-refinement-v1/context/seed0/20261008T123507_834950Z/registered_protocol.yaml",
+    "train",
+    "--dataset",
+    "fasdd_cv_clean_v1",
+    "--method",
+    "context",
+    "--seed",
+    "0",
+    "--tag",
+    "fasdd-n-refinement-v1",
+    "--execute"
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "supervisor_pid": 8932,
+  "runtime": "/home/lxy/Documents/yolo11/Fire-YOLOv11-runtime/fasdd_cv_clean_v1/fasdd-n-refinement-v2/detail_norm/seed0/20261009T104011_715464Z",
+  "log": "/home/lxy/Documents/yolo11/Fire-YOLOv11-runtime/fasdd_cv_clean_v1/fasdd-n-refinement-v2/detail_norm/seed0/20261009T104011_715464Z/train.log",
+  "output": "/home/lxy/Documents/yolo11/Fire-YOLOv11/results/fasdd_cv_clean_v1/fasdd-n-refinement-v2/detail_norm/seed0",
+  "launched_at": "2026-10-09T10:40:11.779948+00:00"
+}

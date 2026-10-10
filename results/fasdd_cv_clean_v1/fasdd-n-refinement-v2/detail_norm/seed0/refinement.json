@@ -1,0 +1,19 @@
+{
+  "mode": "detail_norm",
+  "hidden": 16,
+  "predictor_channels": [
+    64,
+    128,
+    256
+  ],
+  "strides": [
+    8.0,
+    16.0,
+    32.0
+  ],
+  "cached_detail": true,
+  "new_parameters": 5328,
+  "total_parameters": 2595558,
+  "initialization": "Original predictors preserved; zero residual output projection",
+  "path": "P2 PixelUnshuffle2 -> ConvBNAct1x1 -> depthwise ConvBNAct3x3 -> output -> P3 regression"
+}

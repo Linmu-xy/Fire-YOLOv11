@@ -1,0 +1,7 @@
+{
+  "supervisor_pid": 10613,
+  "runtime": "/home/cmj/Documents/FireSmoke/Fire-YOLOv11-runtime/fasdd_cv_clean_v1/fasdd-n-refinement-v2/context/seed0/20261009T103909_412660Z",
+  "log": "/home/cmj/Documents/FireSmoke/Fire-YOLOv11-runtime/fasdd_cv_clean_v1/fasdd-n-refinement-v2/context/seed0/20261009T103909_412660Z/train.log",
+  "output": "/home/cmj/Documents/FireSmoke/Fire-YOLOv11/results/fasdd_cv_clean_v1/fasdd-n-refinement-v2/context/seed0",
+  "launched_at": "2026-10-09T10:39:09.553092+00:00"
+}
